@@ -76,12 +76,14 @@ type PointerId = number;
 
 const CANVAS_RESOLUTION = 1024;
 const UNDO_CAP = 30;
+const TOUCH_POINTER_ID = -1;
 
 const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
   function DrawingCanvasV2({ onDone, onBack, initialBackground, topAction }, ref) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const activePointerRef = useRef<PointerId | null>(null);
+    const activeTouchIdRef = useRef<number | null>(null);
     const lastPosRef = useRef<Point | null>(null);
     const undoStackRef = useRef<ImageData[]>([]);
     const strokeCountRef = useRef(0);
@@ -224,11 +226,9 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
 
     // ── Palm rejection guard ────────────────────────────────────
     const shouldRejectPointer = (e: React.PointerEvent): boolean => {
-      // Reject only unusually broad touch contacts; some mobile browsers report
-      // normal finger pressure as 0, so pressure is not a reliable guard.
-      if (e.pointerType === 'touch') {
-        if (e.width > 48 && e.height > 48) return true;
-      }
+      // Mobile browsers do not report finger geometry consistently enough for
+      // palm rejection. Let touch input draw; the canvas boundary handles scroll.
+      if (e.pointerType === 'touch') return false;
       return false;
     };
 
@@ -265,24 +265,11 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
       initCanvas(canvasRef.current);
     };
 
-    // ── Pointer handlers ────────────────────────────────────────
-    const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-      e.preventDefault();
-      if (shouldRejectPointer(e)) return;
-      if (activePointerRef.current !== null) return; // already tracking a pointer
-
+    const beginStrokeAt = (clientX: number, clientY: number): boolean => {
       const canvas = canvasRef.current;
-      if (!canvas) return;
-
-      try {
-        canvas.setPointerCapture(e.pointerId);
-      } catch {
-        // capture failure is non-fatal
-      }
-      activePointerRef.current = e.pointerId;
-
-      const pos = getCanvasPos(e.clientX, e.clientY);
-      if (!pos) return;
+      if (!canvas) return false;
+      const pos = getCanvasPos(clientX, clientY);
+      if (!pos) return false;
 
       pushUndo();
       lastPosRef.current = pos;
@@ -296,19 +283,16 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
           strokeForTool(tool, ctx, pos, pos, currentSize, color);
         }
       }
+      return true;
     };
 
-    const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-      e.preventDefault();
-      if (activePointerRef.current !== e.pointerId) return;
-      if (shouldRejectPointer(e)) return;
-
+    const continueStrokeAt = (clientX: number, clientY: number): void => {
       const canvas = canvasRef.current;
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      const pos = getCanvasPos(e.clientX, e.clientY);
+      const pos = getCanvasPos(clientX, clientY);
       if (!pos) return;
 
       const from = lastPosRef.current ?? pos;
@@ -320,22 +304,97 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
       lastPosRef.current = pos;
     };
 
-    const finishStroke = (e: React.PointerEvent<HTMLCanvasElement>) => {
-      e.preventDefault();
-      if (activePointerRef.current !== e.pointerId) return;
+    const finishStrokeAt = (clientX?: number, clientY?: number): void => {
       activePointerRef.current = null;
+      activeTouchIdRef.current = null;
       lastPosRef.current = null;
       strokeCountRef.current += 1;
       setHasStrokes(true);
+
+      // Sparkle feedback at the stroke end point
+      if (
+        typeof clientX === 'number' &&
+        typeof clientY === 'number' &&
+        containerRef.current &&
+        !eraser
+      ) {
+        spawnSparkles(clientX, clientY, containerRef.current);
+      }
+    };
+
+    // ── Pointer handlers ────────────────────────────────────────
+    const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+      e.preventDefault();
+      if (shouldRejectPointer(e)) return;
+      if (activePointerRef.current !== null) return; // already tracking a pointer
+
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      if (!beginStrokeAt(e.clientX, e.clientY)) return;
+
+      activePointerRef.current = e.pointerId;
+      if (e.pointerType !== 'touch') {
+        try {
+          canvas.setPointerCapture(e.pointerId);
+        } catch {
+          // capture failure is non-fatal
+        }
+      }
+    };
+
+    const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+      e.preventDefault();
+      if (activePointerRef.current !== e.pointerId) return;
+      if (shouldRejectPointer(e)) return;
+
+      continueStrokeAt(e.clientX, e.clientY);
+    };
+
+    const finishStroke = (e: React.PointerEvent<HTMLCanvasElement>) => {
+      e.preventDefault();
+      if (activePointerRef.current !== e.pointerId) return;
+      finishStrokeAt(e.clientX, e.clientY);
       try {
         canvasRef.current?.releasePointerCapture(e.pointerId);
       } catch {
         // non-fatal
       }
-      // Sparkle feedback at the stroke end point
-      if (containerRef.current && !eraser) {
-        spawnSparkles(e.clientX, e.clientY, containerRef.current);
+    };
+
+    const touchFromList = (
+      list: React.TouchList,
+      identifier: number | null
+    ): React.Touch | null => {
+      if (identifier === null) return list[0] ?? null;
+      for (let i = 0; i < list.length; i += 1) {
+        if (list[i].identifier === identifier) return list[i];
       }
+      return null;
+    };
+
+    const onTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+      if (activePointerRef.current !== null) return;
+      const touch = e.changedTouches[0];
+      if (!touch) return;
+      e.preventDefault();
+      if (!beginStrokeAt(touch.clientX, touch.clientY)) return;
+      activePointerRef.current = TOUCH_POINTER_ID;
+      activeTouchIdRef.current = touch.identifier;
+    };
+
+    const onTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+      if (activePointerRef.current !== TOUCH_POINTER_ID) return;
+      const touch = touchFromList(e.changedTouches, activeTouchIdRef.current);
+      if (!touch) return;
+      e.preventDefault();
+      continueStrokeAt(touch.clientX, touch.clientY);
+    };
+
+    const onTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
+      if (activePointerRef.current !== TOUCH_POINTER_ID) return;
+      const touch = touchFromList(e.changedTouches, activeTouchIdRef.current);
+      e.preventDefault();
+      finishStrokeAt(touch?.clientX, touch?.clientY);
     };
 
     // ── Done button ─────────────────────────────────────────────
@@ -362,9 +421,11 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
     return (
       <div
         ref={containerRef}
-        className="fixed inset-0 flex flex-col"
+        className="fixed inset-0"
         style={{
           background: c.creamDeep,
+          display: 'grid',
+          gridTemplateRows: 'auto minmax(0, 1fr) auto',
           touchAction: 'auto',
           zIndex: 80,
           height: '100dvh',
@@ -378,9 +439,10 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
         <header
           className="drawing-header flex items-center justify-between px-4"
           style={{
-            height: 64,
+            height: 60,
             background: c.cream,
             borderBottom: `1px solid ${c.border}`,
+            gap: 8,
           }}
         >
           <button
@@ -401,28 +463,37 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             ←
           </button>
           <h1
-            className="text-lg"
+            className="drawing-title text-lg"
             style={{
               fontFamily: 'var(--font-display)',
               color: c.brown,
               fontWeight: 500,
               letterSpacing: '-0.01em',
+              flex: '1 1 auto',
+              minWidth: 0,
+              textAlign: 'center',
             }}
           >
             Draw your tooth
           </h1>
-          <div className="flex items-center justify-end" style={{ minWidth: 56 }}>
+          <div
+            className="flex items-center justify-end"
+            style={{ minWidth: 'max-content', flexShrink: 0 }}
+          >
             {topAction}
           </div>
         </header>
 
         {/* Canvas area */}
         <div
-          className="flex-1 flex items-center justify-center p-3 relative"
+          className="drawing-canvas-area flex items-center justify-center p-3 relative"
           style={{
             background: c.creamDeep,
-            touchAction: 'none',
+            touchAction: 'pan-y',
             minHeight: 0,
+            overflowY: 'auto',
+            overscrollBehavior: 'contain',
+            WebkitOverflowScrolling: 'touch',
           }}
         >
           <div
@@ -503,6 +574,10 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                 onPointerUp={finishStroke}
                 onPointerCancel={finishStroke}
                 onPointerLeave={finishStroke}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+                onTouchCancel={onTouchEnd}
               />
             </div>
           </div>
@@ -538,6 +613,9 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
           </div>
 
           <style jsx>{`
+            .drawing-canvas-area {
+              padding: 0.65rem 0.75rem;
+            }
             .drawing-stage {
               width: min(92vw, 720px);
             }
@@ -558,60 +636,79 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             .done-label-short {
               display: none;
             }
+            .drawing-toolbar {
+              max-height: 44dvh;
+              overflow-y: auto;
+              -webkit-overflow-scrolling: touch;
+              touch-action: pan-y;
+            }
             @media (max-width: 420px) {
               .drawing-header {
-                height: 56px !important;
-                padding-left: 0.75rem !important;
-                padding-right: 0.75rem !important;
+                height: 58px !important;
+                padding-left: 0.55rem !important;
+                padding-right: 0.55rem !important;
+              }
+              .drawing-title {
+                font-size: 1rem !important;
+              }
+              .drawing-canvas-area {
+                padding: 0.45rem 0.5rem !important;
+              }
+              .drawing-stage {
+                width: min(84vw, 340px);
+                gap: 0.4rem;
+              }
+              .drawing-prompt {
+                padding: 0.55rem 0.75rem !important;
               }
               .drawing-toolbar {
-                padding-top: 0.5rem !important;
-                padding-bottom: max(0.6rem, env(safe-area-inset-bottom)) !important;
+                padding-top: 0.4rem !important;
+                padding-bottom: max(0.45rem, env(safe-area-inset-bottom)) !important;
               }
               .drawing-tool-row {
                 flex-wrap: nowrap;
-                gap: 0.35rem;
-                margin-bottom: 0.45rem !important;
+                gap: 0.3rem;
+                margin-bottom: 0.35rem !important;
               }
               .tool-group,
               .size-group {
-                gap: 0.35rem;
+                gap: 0.3rem;
               }
               .tool-button,
               .size-button {
-                width: 42px !important;
-                height: 42px !important;
+                width: 40px !important;
+                height: 40px !important;
                 border-width: 1.5px !important;
               }
               .tool-button svg {
-                width: 30px;
-                height: 30px;
+                width: 28px;
+                height: 28px;
               }
               .color-row {
                 justify-content: flex-start !important;
                 flex-wrap: nowrap !important;
                 overflow-x: auto;
-                margin-bottom: 0.5rem !important;
-                padding-bottom: 0.15rem;
+                margin-bottom: 0.35rem !important;
+                padding-bottom: 0.1rem;
                 touch-action: pan-x;
               }
               .color-swatch {
-                width: 34px !important;
-                height: 34px !important;
-                flex: 0 0 34px;
+                width: 30px !important;
+                height: 30px !important;
+                flex: 0 0 30px;
                 border-width: 2px !important;
               }
               .utility-action {
-                width: 46px !important;
-                height: 46px !important;
-                flex-basis: 46px;
+                width: 42px !important;
+                height: 42px !important;
+                flex-basis: 42px;
                 font-size: 10px !important;
                 border-width: 1.5px !important;
               }
               .drawing-done {
-                min-height: 46px !important;
-                font-size: 16px !important;
-                padding-inline: 0.85rem !important;
+                min-height: 42px !important;
+                font-size: 15px !important;
+                padding-inline: 0.65rem !important;
               }
               .done-label-full {
                 display: none;
@@ -622,12 +719,16 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             }
             @media (max-width: 480px) and (max-height: 720px) {
               .drawing-stage {
-                width: min(78vw, 304px);
-                gap: 0.5rem;
+                width: min(72vw, 280px);
+                gap: 0.35rem;
               }
               .drawing-prompt {
-                padding-top: 0.65rem;
-                padding-bottom: 0.65rem;
+                display: none;
+              }
+            }
+            @media (max-width: 360px) {
+              .drawing-title {
+                display: none;
               }
             }
             @keyframes tfn-sparkle {
@@ -660,11 +761,11 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
 
         {/* Tools bar */}
         <div
-          className="drawing-toolbar px-3 pt-3 pb-4"
+          className="drawing-toolbar px-3 pt-2 pb-3"
           style={{
             background: c.cream,
             borderTop: `1px solid ${c.border}`,
-            paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+            paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))',
           }}
         >
           {/* Row 1: tools + sizes */}

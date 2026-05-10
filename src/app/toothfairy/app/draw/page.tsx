@@ -215,13 +215,14 @@ export default function DrawPage() {
         initialBackground={photo}
         topAction={
           <div
-            className="flex items-center justify-end"
+            className="photo-action-pill flex items-center justify-end"
             style={{
-              gap: 6,
-              padding: 3,
-              borderRadius: 999,
+              gap: 4,
+              padding: 4,
+              borderRadius: 18,
               background: 'oklch(99% 0.006 82 / 0.75)',
               border: '1px solid oklch(88% 0.015 75)',
+              boxShadow: '0 8px 20px oklch(30% 0.035 65 / 0.08)',
             }}
           >
             <button
@@ -229,16 +230,23 @@ export default function DrawPage() {
               onClick={() => photoLibraryInputRef.current?.click()}
               aria-label={photo ? 'Choose a different tooth photo' : 'Choose a tooth photo'}
               title="Choose photo"
-              className="flex items-center justify-center rounded-full active:scale-95"
+              className="photo-action-button flex items-center justify-center active:scale-95"
               style={{
-                width: 40,
-                height: 40,
+                width: 68,
+                height: 48,
+                flexDirection: 'column',
+                gap: 1,
+                borderRadius: 14,
                 background: 'transparent',
                 border: 'none',
                 color: 'oklch(30% 0.035 65)',
+                fontFamily: "var(--font-body, 'Alegreya Sans'), sans-serif",
+                fontSize: 10,
+                fontWeight: 700,
+                lineHeight: 1,
               }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <rect
                   x="4"
                   y="5"
@@ -257,16 +265,20 @@ export default function DrawPage() {
                   strokeLinejoin="round"
                 />
               </svg>
+              <span>Photo</span>
             </button>
             <button
               type="button"
               onClick={() => photoInputRef.current?.click()}
               aria-label={photo ? 'Take a new tooth photo' : 'Take a tooth photo'}
               title="Take photo"
-              className="flex items-center justify-center rounded-full active:scale-95"
+              className="photo-action-button flex items-center justify-center active:scale-95"
               style={{
-                width: 40,
-                height: 40,
+                width: 68,
+                height: 48,
+                flexDirection: 'column',
+                gap: 1,
+                borderRadius: 14,
                 background: photo
                   ? 'oklch(72% 0.145 75 / 0.15)'
                   : 'transparent',
@@ -274,9 +286,13 @@ export default function DrawPage() {
                   photo ? 'oklch(72% 0.145 75)' : 'transparent'
                 }`,
                 color: photo ? 'oklch(72% 0.145 75)' : 'oklch(30% 0.035 65)',
+                fontFamily: "var(--font-body, 'Alegreya Sans'), sans-serif",
+                fontSize: 10,
+                fontWeight: 700,
+                lineHeight: 1,
               }}
             >
-              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <svg width="25" height="25" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path
                   d="M4.5 8.5h3l1.4-2h6.2l1.4 2h3a1.8 1.8 0 0 1 1.8 1.8v7.4a1.8 1.8 0 0 1-1.8 1.8h-15a1.8 1.8 0 0 1-1.8-1.8v-7.4a1.8 1.8 0 0 1 1.8-1.8Z"
                   stroke="currentColor"
@@ -291,6 +307,7 @@ export default function DrawPage() {
                   strokeWidth="1.8"
                 />
               </svg>
+              <span>Camera</span>
             </button>
           </div>
         }

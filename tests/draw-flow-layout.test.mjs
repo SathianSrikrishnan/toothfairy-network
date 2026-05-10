@@ -25,6 +25,15 @@ test('draw shell permits phone scrolling outside the canvas', () => {
   assert.match(canvasSource, /touchAction:\s*['"]none['"]/);
 });
 
+test('draw canvas only captures touch gestures on the canvas itself', () => {
+  assert.match(canvasSource, /className="drawing-canvas-area/);
+  assert.match(canvasSource, /touchAction:\s*['"]pan-y['"]/);
+  assert.match(canvasSource, /overflowY:\s*['"]auto['"]/);
+  assert.match(canvasSource, /onTouchStart=\{onTouchStart\}/);
+  assert.match(canvasSource, /onTouchMove=\{onTouchMove\}/);
+  assert.match(canvasSource, /TOUCH_POINTER_ID/);
+});
+
 test('draw canvas avoids brittle short-phone viewport math', () => {
   assert.doesNotMatch(canvasSource, /calc\(100dvh - 350px\)/);
   assert.match(canvasSource, /overflowY:\s*['"]auto['"]/);
@@ -33,7 +42,8 @@ test('draw canvas avoids brittle short-phone viewport math', () => {
 
 test('draw canvas has a compact short-phone layout', () => {
   assert.match(canvasSource, /@media \(max-width: 480px\) and \(max-height: 720px\)/);
-  assert.match(canvasSource, /width:\s*min\(78vw, 304px\)/);
+  assert.match(canvasSource, /width:\s*min\(72vw, 280px\)/);
+  assert.match(canvasSource, /\.drawing-prompt\s*\{\s*display:\s*none/);
 });
 
 test('draw canvas does not reject normal zero-pressure finger touches', () => {
@@ -56,6 +66,8 @@ test('draw page exposes photo capture and passes it into the V2 canvas', () => {
   assert.match(drawPageSource, /photoLibraryInputRef/);
   assert.match(drawPageSource, /Choose a tooth photo/);
   assert.match(drawPageSource, /Take a tooth photo/);
+  assert.match(drawPageSource, /photo-action-pill/);
+  assert.match(drawPageSource, /photo-action-button/);
   assert.match(drawPageSource, /initialBackground=\{photo\}/);
   assert.match(drawPageSource, /pointerEvents:\s*['"]none['"]/);
 });
