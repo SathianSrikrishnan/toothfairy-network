@@ -489,7 +489,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
           className="drawing-canvas-area flex items-center justify-center p-3 relative"
           style={{
             background: c.creamDeep,
-            touchAction: 'pan-y',
+            touchAction: 'auto',
             minHeight: 0,
             overflowY: 'auto',
             overscrollBehavior: 'contain',
@@ -622,6 +622,10 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             .color-row {
               -webkit-overflow-scrolling: touch;
               scrollbar-width: none;
+              flex-wrap: nowrap !important;
+              justify-content: flex-start !important;
+              overflow-x: auto;
+              touch-action: pan-x;
             }
             .color-row::-webkit-scrollbar {
               display: none;
@@ -633,16 +637,31 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
               white-space: normal;
               line-height: 1.05;
             }
+            .phone-done-anchor {
+              flex: 1 1 8rem;
+            }
             .done-label-short {
               display: none;
             }
             .drawing-toolbar {
-              max-height: 44dvh;
-              overflow-y: auto;
-              -webkit-overflow-scrolling: touch;
-              touch-action: pan-y;
+              flex: 0 0 auto;
+              overflow: visible;
+              touch-action: auto;
             }
-            @media (max-width: 420px) {
+            .mobile-scroll-cue {
+              position: absolute;
+              right: 0;
+              top: 0;
+              bottom: 0;
+              width: 1.25rem;
+              pointer-events: none;
+              background: linear-gradient(
+                90deg,
+                oklch(97.5% 0.01 80 / 0),
+                ${c.cream}
+              );
+            }
+            @media (max-width: 540px) {
               .drawing-header {
                 height: 58px !important;
                 padding-left: 0.55rem !important;
@@ -655,20 +674,26 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                 padding: 0.45rem 0.5rem !important;
               }
               .drawing-stage {
-                width: min(84vw, 340px);
+                width: min(68vw, 300px);
                 gap: 0.4rem;
               }
               .drawing-prompt {
-                padding: 0.55rem 0.75rem !important;
+                display: none;
               }
               .drawing-toolbar {
                 padding-top: 0.4rem !important;
-                padding-bottom: max(0.45rem, env(safe-area-inset-bottom)) !important;
+                padding-bottom: max(0.35rem, env(safe-area-inset-bottom)) !important;
               }
               .drawing-tool-row {
                 flex-wrap: nowrap;
                 gap: 0.3rem;
                 margin-bottom: 0.35rem !important;
+                overflow-x: auto;
+                scrollbar-width: none;
+                touch-action: pan-x;
+              }
+              .drawing-tool-row::-webkit-scrollbar {
+                display: none;
               }
               .tool-group,
               .size-group {
@@ -685,12 +710,8 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                 height: 28px;
               }
               .color-row {
-                justify-content: flex-start !important;
-                flex-wrap: nowrap !important;
-                overflow-x: auto;
                 margin-bottom: 0.35rem !important;
                 padding-bottom: 0.1rem;
-                touch-action: pan-x;
               }
               .color-swatch {
                 width: 30px !important;
@@ -709,6 +730,8 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                 min-height: 42px !important;
                 font-size: 15px !important;
                 padding-inline: 0.65rem !important;
+                position: relative;
+                z-index: 1;
               }
               .done-label-full {
                 display: none;
@@ -719,7 +742,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             }
             @media (max-width: 480px) and (max-height: 720px) {
               .drawing-stage {
-                width: min(72vw, 280px);
+                width: min(64vw, 260px);
                 gap: 0.35rem;
               }
               .drawing-prompt {
@@ -845,27 +868,30 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
           </div>
 
           {/* Row 2: color swatches */}
-          <div className="color-row flex items-center justify-center gap-1.5 mb-3 flex-wrap">
-            {SWATCHES.map((s) => (
-              <button
-                key={s.name}
-                type="button"
-                onClick={() => setColor(s.hex)}
-                aria-label={`Color ${s.name}`}
-                aria-pressed={color === s.hex}
-                className="color-swatch rounded-full active:scale-95"
-                style={{
-                  width: 38,
-                  height: 38,
-                  background: s.hex,
-                  border:
-                    color === s.hex
-                      ? `3px solid ${c.gold}`
-                      : `2px solid ${c.border}`,
-                  padding: 0,
-                }}
-              />
-            ))}
+          <div className="relative">
+            <div className="color-row flex items-center justify-center gap-1.5 mb-3 flex-wrap">
+              {SWATCHES.map((s) => (
+                <button
+                  key={s.name}
+                  type="button"
+                  onClick={() => setColor(s.hex)}
+                  aria-label={`Color ${s.name}`}
+                  aria-pressed={color === s.hex}
+                  className="color-swatch rounded-full active:scale-95"
+                  style={{
+                    width: 38,
+                    height: 38,
+                    background: s.hex,
+                    border:
+                      color === s.hex
+                        ? `3px solid ${c.gold}`
+                        : `2px solid ${c.border}`,
+                    padding: 0,
+                  }}
+                />
+              ))}
+            </div>
+            <div className="mobile-scroll-cue" aria-hidden />
           </div>
 
           {/* Row 3: eraser + undo + done */}
@@ -932,7 +958,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
               type="button"
               onClick={handleDone}
               disabled={!hasStrokes}
-              className="drawing-done flex-1 rounded-full active:scale-[0.98]"
+              className="drawing-done phone-done-anchor flex-1 rounded-full active:scale-[0.98]"
               style={{
                 minHeight: 56,
                 minWidth: 0,

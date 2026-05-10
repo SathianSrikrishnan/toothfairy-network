@@ -27,7 +27,7 @@ test('draw shell permits phone scrolling outside the canvas', () => {
 
 test('draw canvas only captures touch gestures on the canvas itself', () => {
   assert.match(canvasSource, /className="drawing-canvas-area/);
-  assert.match(canvasSource, /touchAction:\s*['"]pan-y['"]/);
+  assert.match(canvasSource, /touchAction:\s*['"]auto['"]/);
   assert.match(canvasSource, /overflowY:\s*['"]auto['"]/);
   assert.match(canvasSource, /onTouchStart=\{onTouchStart\}/);
   assert.match(canvasSource, /onTouchMove=\{onTouchMove\}/);
@@ -42,7 +42,7 @@ test('draw canvas avoids brittle short-phone viewport math', () => {
 
 test('draw canvas has a compact short-phone layout', () => {
   assert.match(canvasSource, /@media \(max-width: 480px\) and \(max-height: 720px\)/);
-  assert.match(canvasSource, /width:\s*min\(72vw, 280px\)/);
+  assert.match(canvasSource, /width:\s*min\(64vw, 260px\)/);
   assert.match(canvasSource, /\.drawing-prompt\s*\{\s*display:\s*none/);
 });
 
@@ -55,7 +55,16 @@ test('draw controls stay reachable on narrow phones', () => {
   assert.match(canvasSource, /className="color-row/);
   assert.match(canvasSource, /overflow-x:\s*auto/);
   assert.match(canvasSource, /done-label-short/);
-  assert.match(canvasSource, /@media \(max-width: 420px\)/);
+  assert.match(canvasSource, /@media \(max-width: 540px\)/);
+  assert.doesNotMatch(canvasSource, /max-height:\s*44dvh/);
+});
+
+test('phone layout keeps colors and done in visible fixed rows', () => {
+  assert.match(canvasSource, /\.mobile-scroll-cue/);
+  assert.match(canvasSource, /\.phone-done-anchor/);
+  assert.match(canvasSource, /flex-wrap:\s*nowrap\s*!important/);
+  assert.match(canvasSource, /width:\s*min\(68vw, 300px\)/);
+  assert.match(canvasSource, /padding-bottom:\s*max\(0\.35rem, env\(safe-area-inset-bottom\)\)/);
 });
 
 test('draw page exposes photo capture and passes it into the V2 canvas', () => {
