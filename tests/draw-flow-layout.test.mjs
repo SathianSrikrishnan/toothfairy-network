@@ -20,6 +20,11 @@ test('draw canvas owns the viewport above site chrome', () => {
   assert.match(canvasSource, /overscrollBehavior:\s*['"]contain['"]/);
 });
 
+test('draw shell permits phone scrolling outside the canvas', () => {
+  assert.match(canvasSource, /touchAction:\s*['"]auto['"]/);
+  assert.match(canvasSource, /touchAction:\s*['"]none['"]/);
+});
+
 test('draw canvas avoids brittle short-phone viewport math', () => {
   assert.doesNotMatch(canvasSource, /calc\(100dvh - 350px\)/);
   assert.match(canvasSource, /overflowY:\s*['"]auto['"]/);
@@ -35,11 +40,22 @@ test('draw canvas does not reject normal zero-pressure finger touches', () => {
   assert.doesNotMatch(canvasSource, /pressure\s*===\s*0/);
 });
 
+test('draw controls stay reachable on narrow phones', () => {
+  assert.match(canvasSource, /className="drawing-toolbar/);
+  assert.match(canvasSource, /className="color-row/);
+  assert.match(canvasSource, /overflow-x:\s*auto/);
+  assert.match(canvasSource, /done-label-short/);
+  assert.match(canvasSource, /@media \(max-width: 420px\)/);
+});
+
 test('draw page exposes photo capture and passes it into the V2 canvas', () => {
   const drawPageSource = readFileSync('src/app/toothfairy/app/draw/page.tsx', 'utf8');
   assert.match(drawPageSource, /type=['"]file['"]/);
   assert.match(drawPageSource, /accept=['"]image\/\*['"]/);
   assert.match(drawPageSource, /capture=['"]environment['"]/);
+  assert.match(drawPageSource, /photoLibraryInputRef/);
+  assert.match(drawPageSource, /Choose a tooth photo/);
+  assert.match(drawPageSource, /Take a tooth photo/);
   assert.match(drawPageSource, /initialBackground=\{photo\}/);
   assert.match(drawPageSource, /pointerEvents:\s*['"]none['"]/);
 });

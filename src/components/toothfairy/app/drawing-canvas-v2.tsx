@@ -365,7 +365,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
         className="fixed inset-0 flex flex-col"
         style={{
           background: c.creamDeep,
-          touchAction: 'none',
+          touchAction: 'auto',
           zIndex: 80,
           height: '100dvh',
           minHeight: '100vh',
@@ -376,7 +376,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
       >
         {/* Top bar */}
         <header
-          className="flex items-center justify-between px-4"
+          className="drawing-header flex items-center justify-between px-4"
           style={{
             height: 64,
             background: c.cream,
@@ -541,6 +541,85 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             .drawing-stage {
               width: min(92vw, 720px);
             }
+            .color-row {
+              -webkit-overflow-scrolling: touch;
+              scrollbar-width: none;
+            }
+            .color-row::-webkit-scrollbar {
+              display: none;
+            }
+            .utility-action {
+              flex: 0 0 52px;
+            }
+            .drawing-done {
+              white-space: normal;
+              line-height: 1.05;
+            }
+            .done-label-short {
+              display: none;
+            }
+            @media (max-width: 420px) {
+              .drawing-header {
+                height: 56px !important;
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+              }
+              .drawing-toolbar {
+                padding-top: 0.5rem !important;
+                padding-bottom: max(0.6rem, env(safe-area-inset-bottom)) !important;
+              }
+              .drawing-tool-row {
+                flex-wrap: nowrap;
+                gap: 0.35rem;
+                margin-bottom: 0.45rem !important;
+              }
+              .tool-group,
+              .size-group {
+                gap: 0.35rem;
+              }
+              .tool-button,
+              .size-button {
+                width: 42px !important;
+                height: 42px !important;
+                border-width: 1.5px !important;
+              }
+              .tool-button svg {
+                width: 30px;
+                height: 30px;
+              }
+              .color-row {
+                justify-content: flex-start !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto;
+                margin-bottom: 0.5rem !important;
+                padding-bottom: 0.15rem;
+                touch-action: pan-x;
+              }
+              .color-swatch {
+                width: 34px !important;
+                height: 34px !important;
+                flex: 0 0 34px;
+                border-width: 2px !important;
+              }
+              .utility-action {
+                width: 46px !important;
+                height: 46px !important;
+                flex-basis: 46px;
+                font-size: 10px !important;
+                border-width: 1.5px !important;
+              }
+              .drawing-done {
+                min-height: 46px !important;
+                font-size: 16px !important;
+                padding-inline: 0.85rem !important;
+              }
+              .done-label-full {
+                display: none;
+              }
+              .done-label-short {
+                display: inline;
+              }
+            }
             @media (max-width: 480px) and (max-height: 720px) {
               .drawing-stage {
                 width: min(78vw, 304px);
@@ -581,7 +660,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
 
         {/* Tools bar */}
         <div
-          className="px-3 pt-3 pb-4"
+          className="drawing-toolbar px-3 pt-3 pb-4"
           style={{
             background: c.cream,
             borderTop: `1px solid ${c.border}`,
@@ -589,9 +668,9 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
           }}
         >
           {/* Row 1: tools + sizes */}
-          <div className="flex items-center justify-center gap-2 mb-3 flex-wrap">
+          <div className="drawing-tool-row flex items-center justify-center gap-2 mb-3 flex-wrap">
             {/* Tool picker */}
-            <div className="flex items-center justify-center gap-2">
+            <div className="tool-group flex items-center justify-center gap-2">
               {TOOL_ORDER.map((t) => (
                 <button
                   key={t}
@@ -603,7 +682,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                   }}
                   aria-label={`${t} tool`}
                   aria-pressed={tool === t && !eraser}
-                  className="rounded-2xl active:scale-95"
+                  className="tool-button rounded-2xl active:scale-95"
                   style={{
                     width: 52,
                     height: 52,
@@ -626,7 +705,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             </div>
 
             {/* Size picker */}
-            <div className="flex items-center justify-center gap-2">
+            <div className="size-group flex items-center justify-center gap-2">
               {[0, 1, 2].map((i) => {
                 const s = BRUSH_SIZES[tool][i as BrushSizeIndex];
                 const isActive = sizeIndex === i && !eraser;
@@ -640,7 +719,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                     }}
                     aria-label={`Size ${s} pixels`}
                     aria-pressed={isActive}
-                    className="rounded-full active:scale-95 flex items-center justify-center"
+                    className="size-button rounded-full active:scale-95 flex items-center justify-center"
                     style={{
                       width: 48,
                       height: 48,
@@ -665,7 +744,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
           </div>
 
           {/* Row 2: color swatches */}
-          <div className="flex items-center justify-center gap-1.5 mb-3 flex-wrap">
+          <div className="color-row flex items-center justify-center gap-1.5 mb-3 flex-wrap">
             {SWATCHES.map((s) => (
               <button
                 key={s.name}
@@ -673,7 +752,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                 onClick={() => setColor(s.hex)}
                 aria-label={`Color ${s.name}`}
                 aria-pressed={color === s.hex}
-                className="rounded-full active:scale-95"
+                className="color-swatch rounded-full active:scale-95"
                 style={{
                   width: 38,
                   height: 38,
@@ -689,12 +768,12 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
           </div>
 
           {/* Row 3: eraser + undo + done */}
-          <div className="flex items-center gap-2">
+          <div className="drawing-actions flex items-center gap-2">
             <button
               type="button"
               onClick={() => setEraser((e) => !e)}
               aria-pressed={eraser}
-              className="rounded-full active:scale-95"
+              className="utility-action rounded-full active:scale-95"
               style={{
                 width: 52,
                 height: 52,
@@ -713,7 +792,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             <button
               type="button"
               onClick={handleUndo}
-              className="rounded-full active:scale-95"
+              className="utility-action rounded-full active:scale-95"
               style={{
                 width: 52,
                 height: 52,
@@ -732,7 +811,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             <button
               type="button"
               onClick={handleClear}
-              className="rounded-full active:scale-95"
+              className="utility-action rounded-full active:scale-95"
               style={{
                 width: 52,
                 height: 52,
@@ -752,9 +831,10 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
               type="button"
               onClick={handleDone}
               disabled={!hasStrokes}
-              className="flex-1 rounded-full active:scale-[0.98]"
+              className="drawing-done flex-1 rounded-full active:scale-[0.98]"
               style={{
                 minHeight: 56,
+                minWidth: 0,
                 background: hasStrokes ? c.gold : c.border,
                 color: c.cream,
                 fontFamily: 'var(--font-display)',
@@ -769,7 +849,10 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
               }}
               aria-label="I'm done drawing"
             >
-              I&apos;m done drawing
+              <span className="done-label-full">I&apos;m done drawing</span>
+              <span className="done-label-short" aria-hidden>
+                Done
+              </span>
             </button>
           </div>
         </div>
