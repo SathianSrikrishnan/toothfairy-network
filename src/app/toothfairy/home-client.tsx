@@ -45,7 +45,7 @@ function HomeFallback() {
             fontWeight: 800,
           }}
         >
-          Turn a lost tooth into a Toothlight they can grow into.
+          Now turn a lost tooth into your child's first digital wallet.
         </h1>
         <p
           style={{
@@ -56,7 +56,7 @@ function HomeFallback() {
             lineHeight: 1.65,
           }}
         >
-          Save the tooth story, drawing, and family note in one parent-controlled keepsake. The Smile Fund can come later, when the gift path is ready.
+          Start with a Toothlight memory. Parents control the wallet, the timing, and the family link.
         </p>
         <a
           href="/toothfairy/app/draw?from=home"
