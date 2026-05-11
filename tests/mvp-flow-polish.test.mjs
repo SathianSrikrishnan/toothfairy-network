@@ -34,8 +34,8 @@ test('gift page keeps card gifts paused and optional', () => {
 
 test('draw page has a small header attached to the canvas moment', () => {
   assert.doesNotMatch(drawCanvas, /Tiny tooth memory/);
-  assert.match(drawCanvas, /Start with a photo or your imagination/);
-  assert.match(drawCanvas, /Draw anything you want to enhance next/);
+  assert.match(drawCanvas, /Start with a photo or draw anything/);
+  assert.doesNotMatch(drawCanvas, /enhance next/);
   assert.match(drawCanvas, /width:\s*min\(92vw, 720px\)/);
   assert.match(drawCanvas, /overflowY:\s*['"]auto['"]/);
 });

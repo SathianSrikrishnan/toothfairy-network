@@ -426,6 +426,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
           background: c.creamDeep,
           display: 'grid',
           gridTemplateRows: 'auto minmax(0, 1fr) auto',
+          boxSizing: 'border-box',
           touchAction: 'auto',
           zIndex: 80,
           height: '100dvh',
@@ -541,7 +542,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                   lineHeight: 1.2,
                 }}
               >
-                Start with a photo or your imagination. Draw anything you want to enhance next.
+                Start with a photo or draw anything.
               </p>
             </div>
             <div
@@ -664,6 +665,9 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             .drawing-control-row::-webkit-scrollbar {
               display: none;
             }
+            .color-strip {
+              flex: 0 0 auto;
+            }
             .action-group {
               flex-shrink: 0;
             }
@@ -699,7 +703,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                 overflow: hidden !important;
               }
               .drawing-stage {
-                width: min(84vw, 380px, calc(100svh - 150px));
+                width: min(88vw, 400px, calc(100svh - 154px));
                 gap: 0.4rem;
               }
               .drawing-prompt {
@@ -714,7 +718,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
               .drawing-control-row {
                 flex-wrap: nowrap;
                 gap: 0.3rem;
-                margin-bottom: 0.3rem !important;
+                margin-bottom: 0 !important;
                 overflow-x: auto;
                 scrollbar-width: none;
                 touch-action: pan-x;
@@ -737,6 +741,9 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                 width: 25px;
                 height: 25px;
               }
+              .color-strip {
+                margin-bottom: 0.3rem;
+              }
               .color-row {
                 gap: 0.25rem !important;
                 justify-content: center !important;
@@ -744,9 +751,9 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                 padding-bottom: 0;
               }
               .color-swatch {
-                width: 25px !important;
-                height: 25px !important;
-                flex: 0 0 25px;
+                width: 24px !important;
+                height: 24px !important;
+                flex: 0 0 24px;
                 border-width: 2px !important;
               }
               .utility-action {
@@ -762,9 +769,16 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                 padding-inline: 0.7rem !important;
               }
             }
+            @supports (-webkit-touch-callout: none) {
+              @media (max-width: 540px) {
+                .drawing-shell {
+                  padding-bottom: 44px !important;
+                }
+              }
+            }
             @media (max-width: 480px) and (max-height: 720px) {
               .drawing-stage {
-                width: min(80vw, 330px, calc(100svh - 140px));
+                width: min(84vw, 350px, calc(100svh - 144px));
                 gap: 0.35rem;
               }
               .drawing-prompt {
@@ -813,7 +827,34 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))',
           }}
         >
-          {/* Row 1: tools + sizes + actions */}
+          {/* Row 1: color swatches */}
+          <div className="relative color-strip">
+            <div className="color-row flex items-center justify-center gap-1.5 mb-3 flex-wrap">
+              {SWATCHES.map((s) => (
+                <button
+                  key={s.name}
+                  type="button"
+                  onClick={() => setColor(s.hex)}
+                  aria-label={`Color ${s.name}`}
+                  aria-pressed={color === s.hex}
+                  className="color-swatch rounded-full active:scale-95"
+                  style={{
+                    width: 38,
+                    height: 38,
+                    background: s.hex,
+                    border:
+                      color === s.hex
+                        ? `3px solid ${c.gold}`
+                        : `2px solid ${c.border}`,
+                    padding: 0,
+                  }}
+                />
+              ))}
+            </div>
+            <div className="mobile-scroll-cue" aria-hidden />
+          </div>
+
+          {/* Row 2: tools + sizes + actions */}
           <div className="drawing-control-row flex items-center justify-center gap-2 mb-2 flex-wrap">
             {/* Tool picker */}
             <div className="tool-group flex items-center justify-center gap-2">
@@ -948,33 +989,6 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                 Clear
               </button>
             </div>
-          </div>
-
-          {/* Row 2: color swatches */}
-          <div className="relative">
-            <div className="color-row flex items-center justify-center gap-1.5 mb-3 flex-wrap">
-              {SWATCHES.map((s) => (
-                <button
-                  key={s.name}
-                  type="button"
-                  onClick={() => setColor(s.hex)}
-                  aria-label={`Color ${s.name}`}
-                  aria-pressed={color === s.hex}
-                  className="color-swatch rounded-full active:scale-95"
-                  style={{
-                    width: 38,
-                    height: 38,
-                    background: s.hex,
-                    border:
-                      color === s.hex
-                        ? `3px solid ${c.gold}`
-                        : `2px solid ${c.border}`,
-                    padding: 0,
-                  }}
-                />
-              ))}
-            </div>
-            <div className="mobile-scroll-cue" aria-hidden />
           </div>
 
         </div>
