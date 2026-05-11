@@ -15,6 +15,7 @@ test('draw flow hides the marketing header and footer chrome', () => {
 });
 
 test('draw canvas owns the viewport above site chrome', () => {
+  assert.match(canvasSource, /className="drawing-shell/);
   assert.match(canvasSource, /zIndex:\s*80/);
   assert.match(canvasSource, /height:\s*['"]100dvh['"]/);
   assert.match(canvasSource, /overscrollBehavior:\s*['"]contain['"]/);
@@ -42,7 +43,7 @@ test('draw canvas avoids brittle short-phone viewport math', () => {
 
 test('draw canvas has a compact short-phone layout', () => {
   assert.match(canvasSource, /@media \(max-width: 480px\) and \(max-height: 720px\)/);
-  assert.match(canvasSource, /width:\s*min\(64vw, 260px\)/);
+  assert.match(canvasSource, /width:\s*min\(78vw, 320px, calc\(100svh - 176px\)\)/);
   assert.match(canvasSource, /\.drawing-prompt\s*\{\s*display:\s*none/);
 });
 
@@ -62,9 +63,13 @@ test('draw controls stay reachable on narrow phones', () => {
 test('phone layout keeps colors and done in visible fixed rows', () => {
   assert.match(canvasSource, /\.mobile-scroll-cue/);
   assert.match(canvasSource, /\.phone-done-anchor/);
+  assert.match(canvasSource, /\.header-done/);
+  assert.match(canvasSource, /\.desktop-done/);
   assert.match(canvasSource, /flex-wrap:\s*nowrap\s*!important/);
-  assert.match(canvasSource, /width:\s*min\(68vw, 300px\)/);
+  assert.match(canvasSource, /width:\s*min\(82vw, 360px, calc\(100svh - 196px\)\)/);
   assert.match(canvasSource, /padding-bottom:\s*max\(0\.35rem, env\(safe-area-inset-bottom\)\)/);
+  assert.match(canvasSource, /height:\s*100svh\s*!important/);
+  assert.match(canvasSource, /overflow:\s*hidden\s*!important/);
 });
 
 test('draw page exposes photo capture and passes it into the V2 canvas', () => {

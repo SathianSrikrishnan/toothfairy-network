@@ -421,7 +421,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
     return (
       <div
         ref={containerRef}
-        className="fixed inset-0"
+        className="drawing-shell fixed inset-0"
         style={{
           background: c.creamDeep,
           display: 'grid',
@@ -482,6 +482,27 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
           >
             {topAction}
           </div>
+          <button
+            type="button"
+            onClick={handleDone}
+            disabled={!hasStrokes}
+            className="header-done phone-done-anchor rounded-full active:scale-[0.98]"
+            style={{
+              minWidth: 64,
+              height: 42,
+              background: hasStrokes ? c.gold : c.border,
+              color: c.cream,
+              fontFamily: 'var(--font-display)',
+              fontSize: 15,
+              fontWeight: 600,
+              border: 'none',
+              padding: '0 0.9rem',
+              opacity: hasStrokes ? 1 : 0.6,
+            }}
+            aria-label="I'm done drawing"
+          >
+            Done
+          </button>
         </header>
 
         {/* Canvas area */}
@@ -637,6 +658,9 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
               white-space: normal;
               line-height: 1.05;
             }
+            .header-done {
+              display: none;
+            }
             .phone-done-anchor {
               flex: 1 1 8rem;
             }
@@ -662,8 +686,13 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
               );
             }
             @media (max-width: 540px) {
+              .drawing-shell {
+                height: 100svh !important;
+                min-height: 100svh !important;
+                overflow: hidden !important;
+              }
               .drawing-header {
-                height: 58px !important;
+                height: 54px !important;
                 padding-left: 0.55rem !important;
                 padding-right: 0.55rem !important;
               }
@@ -671,17 +700,18 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                 font-size: 1rem !important;
               }
               .drawing-canvas-area {
-                padding: 0.45rem 0.5rem !important;
+                padding: 0.35rem 0.5rem !important;
+                overflow: hidden !important;
               }
               .drawing-stage {
-                width: min(68vw, 300px);
+                width: min(82vw, 360px, calc(100svh - 196px));
                 gap: 0.4rem;
               }
               .drawing-prompt {
                 display: none;
               }
               .drawing-toolbar {
-                padding-top: 0.4rem !important;
+                padding-top: 0.3rem !important;
                 padding-bottom: max(0.35rem, env(safe-area-inset-bottom)) !important;
               }
               .drawing-tool-row {
@@ -739,10 +769,18 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
               .done-label-short {
                 display: inline;
               }
+              .header-done {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+              }
+              .desktop-done {
+                display: none !important;
+              }
             }
             @media (max-width: 480px) and (max-height: 720px) {
               .drawing-stage {
-                width: min(64vw, 260px);
+                width: min(78vw, 320px, calc(100svh - 176px));
                 gap: 0.35rem;
               }
               .drawing-prompt {
@@ -958,7 +996,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
               type="button"
               onClick={handleDone}
               disabled={!hasStrokes}
-              className="drawing-done phone-done-anchor flex-1 rounded-full active:scale-[0.98]"
+              className="drawing-done desktop-done flex-1 rounded-full active:scale-[0.98]"
               style={{
                 minHeight: 56,
                 minWidth: 0,
