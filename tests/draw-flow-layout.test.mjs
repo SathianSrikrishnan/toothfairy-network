@@ -76,12 +76,15 @@ test('phone layout keeps colors and done in visible fixed rows', () => {
   assert.match(canvasSource, /align-items:\s*flex-start\s*!important/);
   assert.match(canvasSource, /height:\s*100dvh\s*!important/);
   assert.match(canvasSource, /overflow:\s*hidden\s*!important/);
+  assert.match(canvasSource, /width:\s*38px\s*!important/);
+  assert.match(canvasSource, /width:\s*28px\s*!important/);
+  assert.match(canvasSource, /width:\s*44px\s*!important/);
 });
 
 test('ios browser chrome gets a bottom lift without hiding colors', () => {
   assert.match(canvasSource, /boxSizing:\s*['"]border-box['"]/);
   assert.match(canvasSource, /@supports \(-webkit-touch-callout: none\)/);
-  assert.match(canvasSource, /padding-bottom:\s*calc\(env\(safe-area-inset-bottom\) \+ 76px\)\s*!important/);
+  assert.match(canvasSource, /padding-bottom:\s*calc\(env\(safe-area-inset-bottom\) \+ 48px\)\s*!important/);
   assert.ok(
     canvasSource.indexOf('className="relative color-strip"') <
       canvasSource.indexOf('className="drawing-control-row')

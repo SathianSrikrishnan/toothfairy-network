@@ -745,14 +745,14 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                 gap: 0;
               }
               .drawing-toolbar {
-                padding-left: 0.4rem !important;
-                padding-right: 0.4rem !important;
-                padding-top: 0.25rem !important;
-                padding-bottom: 0.25rem !important;
+                padding-left: 0.25rem !important;
+                padding-right: 0.25rem !important;
+                padding-top: 0.35rem !important;
+                padding-bottom: 0.35rem !important;
               }
               .drawing-control-row {
                 flex-wrap: nowrap;
-                gap: 0.25rem;
+                gap: 0.1rem;
                 justify-content: center !important;
                 margin-bottom: 0 !important;
                 overflow-x: visible;
@@ -765,40 +765,40 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
               .tool-group,
               .size-group,
               .action-group {
-                gap: 0.25rem;
+                gap: 0.1rem;
               }
               .tool-button,
               .size-button {
-                width: 34px !important;
-                height: 34px !important;
+                width: 38px !important;
+                height: 38px !important;
                 border-width: 1.5px !important;
               }
               .tool-button svg {
-                width: 23px;
-                height: 23px;
+                width: 25px;
+                height: 25px;
               }
               .color-strip {
-                margin-bottom: 0.15rem;
+                margin-bottom: 0.25rem;
               }
               .color-row {
                 flex-flow: row nowrap !important;
-                gap: 0.22rem !important;
+                gap: 0.28rem !important;
                 justify-content: center !important;
                 margin-bottom: 0 !important;
                 overflow-x: visible !important;
                 padding-bottom: 0;
               }
               .color-swatch {
-                width: 22px !important;
-                height: 22px !important;
-                flex: 0 0 22px;
+                width: 28px !important;
+                height: 28px !important;
+                flex: 0 0 28px;
                 border-width: 2px !important;
               }
               .utility-action {
-                width: 36px !important;
-                height: 34px !important;
-                flex-basis: 36px;
-                font-size: 8.5px !important;
+                width: 44px !important;
+                height: 38px !important;
+                flex-basis: 44px;
+                font-size: 9.5px !important;
                 border-width: 1.5px !important;
               }
               .header-done {
@@ -811,7 +811,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             @supports (-webkit-touch-callout: none) {
               @media (max-width: 540px) {
                 .drawing-shell {
-                  padding-bottom: calc(env(safe-area-inset-bottom) + 76px) !important;
+                  padding-bottom: calc(env(safe-area-inset-bottom) + 48px) !important;
                 }
               }
             }
@@ -824,6 +824,26 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             @media (max-width: 360px) {
               .drawing-title {
                 font-size: 0.84rem !important;
+              }
+              .tool-button,
+              .size-button {
+                width: 34px !important;
+                height: 34px !important;
+              }
+              .tool-button svg {
+                width: 23px;
+                height: 23px;
+              }
+              .color-swatch {
+                width: 22px !important;
+                height: 22px !important;
+                flex-basis: 22px;
+              }
+              .utility-action {
+                width: 36px !important;
+                height: 34px !important;
+                flex-basis: 36px;
+                font-size: 8.5px !important;
               }
             }
             @keyframes tfn-sparkle {
