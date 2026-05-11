@@ -286,8 +286,8 @@ test("parent-facing copy leads with Toothlight memory instead of bank language",
   const footer = read("src/components/toothfairy/nav/tfn-footer.tsx")
   const keepsake = read("src/app/toothfairy/keepsake/[id]/page.tsx")
   const smileFund = read("src/app/toothfairy/smile-fund/page.tsx")
-  const productLanguage = read("docs/launch-readiness/tfn-product-language.md")
-  const currentState = read("docs/launch-readiness/tfn-current-state.md")
+  const productLanguage = read("docs/archive/launch-readiness/tfn-product-language.md")
+  const currentState = read("docs/archive/launch-readiness/tfn-current-state.md")
 
   assert.match(homepage, /a Toothlight they can grow into/i)
   assert.match(homepage, /Toothlight/i)
@@ -405,7 +405,7 @@ test("about page keeps technology quiet and parent-first", () => {
 })
 
 test("Resend launch email flows have a delivery and idempotency map", () => {
-  const emailMap = read("docs/launch-readiness/2026-05-06-resend-email-flow-map.md")
+  const emailMap = read("docs/archive/launch-readiness/2026-05-06-resend-email-flow-map.md")
 
   assert.match(emailMap, /Welcome/i)
   assert.match(emailMap, /Memory created/i)
@@ -456,22 +456,68 @@ test("draft animation work is excluded without removing live hero assets", () =>
   assert.doesNotMatch(homepage, /TandaRitualPreview/)
 })
 
-test("stories atlas leads with worldbuilding and a subtle family-memory bridge", () => {
+test("stories atlas reads as a child-facing bedtime story gateway", () => {
   const stories = read("src/app/toothfairy/stories/page.tsx")
   const grandparents = read("src/app/toothfairy/grandparents/page.tsx")
   const faq = read("src/app/toothfairy/faq/page.tsx")
   const smileFund = read("src/app/toothfairy/smile-fund/page.tsx")
 
   assert.match(stories, /Tooth Fairy Atlas/)
-  assert.match(stories, /Coming stories/)
+  assert.match(stories, /Seven keepers/)
+  assert.match(stories, /Seven ways to make magic from a lost tooth/)
+  assert.match(stories, /50\+[\s\S]*global traditions/)
+  assert.match(stories, /bedtime stories/i)
+  assert.match(stories, /Start here/)
+  assert.match(stories, /Read the stories/)
+  assert.match(stories, /Explore the atlas/)
+  assert.match(stories, /Network origin/i)
   assert.match(stories, /Every tooth tradition opens a door to culture/)
-  assert.match(stories, /Ask someone who remembers/)
-  assert.match(stories, /Turn story night into a family memory/)
-  assert.match(stories, /Add your story/)
-  assert.match(stories, /tooth keeper roster/i)
-  assert.match(stories, /family memory bridge/)
-  assert.match(stories, /\/toothfairy\/grandparents/)
-  assert.match(stories, /\/toothfairy\/faq/)
+  assert.match(stories, /More keepers are waiting on the next shelf/)
+  assert.match(stories, /Meet the Collectors/)
+  assert.match(stories, /s2-frame-03-maker\.png/)
+  assert.match(stories, /rp-02-mouse\.png/)
+  assert.match(stories, /kkachi-collector-card\.png/)
+  assert.match(stories, /story-06-daga-site-portrait\.png/)
+  assert.match(stories, /culture-strip/)
+  assert.match(stories, /Finland/)
+  assert.match(stories, /Nigeria/)
+  assert.match(stories, /Germany/)
+  assert.match(stories, /India/)
+  assert.match(stories, /Malaysia/)
+  for (const collector of [
+    "Tanda",
+    "Tanda's father",
+    "Ratoncito Perez",
+    "Kkachi",
+    "Waraba",
+    "Daga",
+    "Anna Bogle",
+  ]) {
+    assert.match(stories, new RegExp(collector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")))
+  }
+  assert.doesNotMatch(stories, /Story 1/)
+  assert.doesNotMatch(stories, /Begin here/)
+  assert.doesNotMatch(stories, /The old forgetting/)
+  assert.doesNotMatch(stories, /s2-ref-father-shipbuilder/)
+  assert.doesNotMatch(stories, /char-perez\.jpg/)
+  assert.doesNotMatch(stories, /vo-02-father\.png/)
+  assert.doesNotMatch(stories, /s1-char-tanda-leader-sheet/)
+  assert.doesNotMatch(stories, /char-kkachi\.png/)
+  assert.doesNotMatch(stories, /char-daga\.png/)
+  assert.doesNotMatch(stories, /allTraditionImages/)
+  assert.doesNotMatch(stories, /filmstrip/)
+  assert.doesNotMatch(stories, /gallery-count/)
+  assert.doesNotMatch(stories, /First promise/)
+  assert.doesNotMatch(stories, /Then the map widens/)
+  assert.doesNotMatch(stories, /Romania/)
+  assert.doesNotMatch(stories, /Netherlands/)
+  assert.doesNotMatch(stories, /The atlas should feel like/)
+  assert.doesNotMatch(stories, /Meet the keepers/)
+  assert.doesNotMatch(stories, /Story shelf/)
+  assert.doesNotMatch(stories, /Ask someone who remembers/)
+  assert.doesNotMatch(stories, /grandparent-card/)
+  assert.doesNotMatch(stories, /\/toothfairy\/grandparents/)
+  assert.doesNotMatch(stories, /\/toothfairy\/faq/)
   assert.doesNotMatch(stories, /Bring in grandparents/)
   assert.doesNotMatch(stories, /Grandparents need/)
   assert.doesNotMatch(stories, /familyPrompt/)
