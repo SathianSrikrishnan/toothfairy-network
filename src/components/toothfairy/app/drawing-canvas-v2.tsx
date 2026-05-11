@@ -76,12 +76,14 @@ type PointerId = number;
 
 const CANVAS_RESOLUTION = 1024;
 const UNDO_CAP = 30;
+const TOUCH_POINTER_ID = -1;
 
 const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
   function DrawingCanvasV2({ onDone, onBack, initialBackground, topAction }, ref) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const activePointerRef = useRef<PointerId | null>(null);
+    const activeTouchIdRef = useRef<number | null>(null);
     const lastPosRef = useRef<Point | null>(null);
     const undoStackRef = useRef<ImageData[]>([]);
     const strokeCountRef = useRef(0);
@@ -224,11 +226,9 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
 
     // ── Palm rejection guard ────────────────────────────────────
     const shouldRejectPointer = (e: React.PointerEvent): boolean => {
-      // Reject only unusually broad touch contacts; some mobile browsers report
-      // normal finger pressure as 0, so pressure is not a reliable guard.
-      if (e.pointerType === 'touch') {
-        if (e.width > 48 && e.height > 48) return true;
-      }
+      // Mobile browsers do not report finger geometry consistently enough for
+      // palm rejection. Let touch input draw; the canvas boundary handles scroll.
+      if (e.pointerType === 'touch') return false;
       return false;
     };
 
@@ -265,24 +265,11 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
       initCanvas(canvasRef.current);
     };
 
-    // ── Pointer handlers ────────────────────────────────────────
-    const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-      e.preventDefault();
-      if (shouldRejectPointer(e)) return;
-      if (activePointerRef.current !== null) return; // already tracking a pointer
-
+    const beginStrokeAt = (clientX: number, clientY: number): boolean => {
       const canvas = canvasRef.current;
-      if (!canvas) return;
-
-      try {
-        canvas.setPointerCapture(e.pointerId);
-      } catch {
-        // capture failure is non-fatal
-      }
-      activePointerRef.current = e.pointerId;
-
-      const pos = getCanvasPos(e.clientX, e.clientY);
-      if (!pos) return;
+      if (!canvas) return false;
+      const pos = getCanvasPos(clientX, clientY);
+      if (!pos) return false;
 
       pushUndo();
       lastPosRef.current = pos;
@@ -296,19 +283,16 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
           strokeForTool(tool, ctx, pos, pos, currentSize, color);
         }
       }
+      return true;
     };
 
-    const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-      e.preventDefault();
-      if (activePointerRef.current !== e.pointerId) return;
-      if (shouldRejectPointer(e)) return;
-
+    const continueStrokeAt = (clientX: number, clientY: number): void => {
       const canvas = canvasRef.current;
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      const pos = getCanvasPos(e.clientX, e.clientY);
+      const pos = getCanvasPos(clientX, clientY);
       if (!pos) return;
 
       const from = lastPosRef.current ?? pos;
@@ -320,22 +304,97 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
       lastPosRef.current = pos;
     };
 
-    const finishStroke = (e: React.PointerEvent<HTMLCanvasElement>) => {
-      e.preventDefault();
-      if (activePointerRef.current !== e.pointerId) return;
+    const finishStrokeAt = (clientX?: number, clientY?: number): void => {
       activePointerRef.current = null;
+      activeTouchIdRef.current = null;
       lastPosRef.current = null;
       strokeCountRef.current += 1;
       setHasStrokes(true);
+
+      // Sparkle feedback at the stroke end point
+      if (
+        typeof clientX === 'number' &&
+        typeof clientY === 'number' &&
+        containerRef.current &&
+        !eraser
+      ) {
+        spawnSparkles(clientX, clientY, containerRef.current);
+      }
+    };
+
+    // ── Pointer handlers ────────────────────────────────────────
+    const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+      e.preventDefault();
+      if (shouldRejectPointer(e)) return;
+      if (activePointerRef.current !== null) return; // already tracking a pointer
+
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      if (!beginStrokeAt(e.clientX, e.clientY)) return;
+
+      activePointerRef.current = e.pointerId;
+      if (e.pointerType !== 'touch') {
+        try {
+          canvas.setPointerCapture(e.pointerId);
+        } catch {
+          // capture failure is non-fatal
+        }
+      }
+    };
+
+    const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+      e.preventDefault();
+      if (activePointerRef.current !== e.pointerId) return;
+      if (shouldRejectPointer(e)) return;
+
+      continueStrokeAt(e.clientX, e.clientY);
+    };
+
+    const finishStroke = (e: React.PointerEvent<HTMLCanvasElement>) => {
+      e.preventDefault();
+      if (activePointerRef.current !== e.pointerId) return;
+      finishStrokeAt(e.clientX, e.clientY);
       try {
         canvasRef.current?.releasePointerCapture(e.pointerId);
       } catch {
         // non-fatal
       }
-      // Sparkle feedback at the stroke end point
-      if (containerRef.current && !eraser) {
-        spawnSparkles(e.clientX, e.clientY, containerRef.current);
+    };
+
+    const touchFromList = (
+      list: React.TouchList,
+      identifier: number | null
+    ): React.Touch | null => {
+      if (identifier === null) return list[0] ?? null;
+      for (let i = 0; i < list.length; i += 1) {
+        if (list[i].identifier === identifier) return list[i];
       }
+      return null;
+    };
+
+    const onTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+      if (activePointerRef.current !== null) return;
+      const touch = e.changedTouches[0];
+      if (!touch) return;
+      e.preventDefault();
+      if (!beginStrokeAt(touch.clientX, touch.clientY)) return;
+      activePointerRef.current = TOUCH_POINTER_ID;
+      activeTouchIdRef.current = touch.identifier;
+    };
+
+    const onTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+      if (activePointerRef.current !== TOUCH_POINTER_ID) return;
+      const touch = touchFromList(e.changedTouches, activeTouchIdRef.current);
+      if (!touch) return;
+      e.preventDefault();
+      continueStrokeAt(touch.clientX, touch.clientY);
+    };
+
+    const onTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
+      if (activePointerRef.current !== TOUCH_POINTER_ID) return;
+      const touch = touchFromList(e.changedTouches, activeTouchIdRef.current);
+      e.preventDefault();
+      finishStrokeAt(touch?.clientX, touch?.clientY);
     };
 
     // ── Done button ─────────────────────────────────────────────
@@ -362,10 +421,13 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
     return (
       <div
         ref={containerRef}
-        className="fixed inset-0 flex flex-col"
+        className="drawing-shell fixed inset-0"
         style={{
           background: c.creamDeep,
-          touchAction: 'none',
+          display: 'grid',
+          gridTemplateRows: 'auto minmax(0, 1fr) auto',
+          boxSizing: 'border-box',
+          touchAction: 'auto',
           zIndex: 80,
           height: '100dvh',
           minHeight: '100vh',
@@ -376,18 +438,19 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
       >
         {/* Top bar */}
         <header
-          className="flex items-center justify-between px-4"
+          className="drawing-header flex items-center justify-between px-4"
           style={{
-            height: 64,
+            height: 60,
             background: c.cream,
             borderBottom: `1px solid ${c.border}`,
+            gap: 8,
           }}
         >
           <button
             type="button"
             onClick={onBack}
             aria-label="Back"
-            className="flex items-center justify-center rounded-full active:scale-95"
+            className="drawing-back-button flex items-center justify-center rounded-full active:scale-95"
             style={{
               width: 48,
               height: 48,
@@ -401,28 +464,58 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             ←
           </button>
           <h1
-            className="text-lg"
+            className="drawing-title text-lg"
             style={{
               fontFamily: 'var(--font-display)',
               color: c.brown,
               fontWeight: 500,
               letterSpacing: '-0.01em',
+              flex: '1 1 auto',
+              minWidth: 0,
+              textAlign: 'center',
             }}
           >
-            Draw your tooth
+            Start with a photo or draw anything.
           </h1>
-          <div className="flex items-center justify-end" style={{ minWidth: 56 }}>
+          <div
+            className="drawing-top-action flex items-center justify-end"
+            style={{ minWidth: 'max-content', flexShrink: 0 }}
+          >
             {topAction}
           </div>
+          <button
+            type="button"
+            onClick={handleDone}
+            disabled={!hasStrokes}
+            className="header-done phone-done-anchor rounded-full active:scale-[0.98]"
+            style={{
+              minWidth: 64,
+              height: 42,
+              background: hasStrokes ? c.gold : c.border,
+              color: c.cream,
+              fontFamily: 'var(--font-display)',
+              fontSize: 15,
+              fontWeight: 600,
+              border: 'none',
+              padding: '0 0.9rem',
+              opacity: hasStrokes ? 1 : 0.6,
+            }}
+            aria-label="Done drawing"
+          >
+            Done
+          </button>
         </header>
 
         {/* Canvas area */}
         <div
-          className="flex-1 flex items-center justify-center p-3 relative"
+          className="drawing-canvas-area flex items-center justify-center p-3 relative"
           style={{
             background: c.creamDeep,
-            touchAction: 'none',
+            touchAction: 'auto',
             minHeight: 0,
+            overflowY: 'auto',
+            overscrollBehavior: 'contain',
+            WebkitOverflowScrolling: 'touch',
           }}
         >
           <div
@@ -432,39 +525,6 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
               maxWidth: '100%',
             }}
           >
-            <div
-              className="drawing-prompt w-full rounded-2xl px-4 py-3 text-center"
-              style={{
-                background: 'oklch(99% 0.006 82 / 0.82)',
-                border: `1px solid ${c.border}`,
-                boxShadow: `0 8px 26px ${c.shadow}`,
-              }}
-            >
-              <p
-                style={{
-                  margin: 0,
-                  color: c.gold,
-                  fontFamily: 'var(--font-body)',
-                  fontSize: 11,
-                  fontWeight: 800,
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                Tiny tooth memory
-              </p>
-              <p
-                style={{
-                  margin: '0.25rem 0 0',
-                  color: c.brownSoft,
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 'clamp(1rem, 2.2vw, 1.2rem)',
-                  lineHeight: 1.2,
-                }}
-              >
-                Draw the tooth, a feeling, or a symbol.
-              </p>
-            </div>
             <div
               className="relative"
               style={{
@@ -503,6 +563,10 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                 onPointerUp={finishStroke}
                 onPointerCancel={finishStroke}
                 onPointerLeave={finishStroke}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+                onTouchCancel={onTouchEnd}
               />
             </div>
           </div>
@@ -537,18 +601,249 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             ))}
           </div>
 
-          <style jsx>{`
+          <style jsx global>{`
+            .drawing-header {
+              position: relative;
+            }
+            .drawing-title {
+              left: 50%;
+              max-width: min(52vw, 540px);
+              pointer-events: none;
+              position: absolute;
+              transform: translateX(-50%);
+              white-space: nowrap;
+              width: max-content;
+            }
+            .drawing-top-action {
+              margin-left: auto;
+            }
+            .drawing-canvas-area {
+              padding: 0.65rem 0.75rem;
+            }
             .drawing-stage {
               width: min(92vw, 720px);
             }
+            .color-row {
+              -webkit-overflow-scrolling: touch;
+              scrollbar-width: none;
+              flex-wrap: nowrap !important;
+              justify-content: center !important;
+              overflow-x: auto;
+              touch-action: pan-x;
+            }
+            .color-row::-webkit-scrollbar {
+              display: none;
+            }
+            .utility-action {
+              flex: 0 0 52px;
+            }
+            .header-done {
+              align-items: center;
+              display: flex;
+              flex-shrink: 0;
+              justify-content: center;
+            }
+            .phone-done-anchor {
+              flex: 0 0 auto;
+            }
+            .drawing-toolbar {
+              flex: 0 0 auto;
+              overflow: visible;
+              touch-action: auto;
+            }
+            .drawing-control-row {
+              flex-wrap: nowrap !important;
+              overflow-x: auto;
+              scrollbar-width: none;
+              touch-action: pan-x;
+            }
+            .drawing-control-row::-webkit-scrollbar {
+              display: none;
+            }
+            .color-strip {
+              flex: 0 0 auto;
+            }
+            .action-group {
+              flex-shrink: 0;
+            }
+            .mobile-scroll-cue {
+              position: absolute;
+              right: 0;
+              top: 0;
+              bottom: 0;
+              width: 1.25rem;
+              pointer-events: none;
+              background: linear-gradient(
+                90deg,
+                oklch(97.5% 0.01 80 / 0),
+                ${c.cream}
+              );
+            }
+            @media (max-width: 540px) {
+              .drawing-shell {
+                height: 100dvh !important;
+                min-height: 100dvh !important;
+                max-height: 100dvh !important;
+                overflow: hidden !important;
+              }
+              .drawing-header {
+                align-content: center;
+                flex-wrap: wrap;
+                gap: 0.25rem !important;
+                height: auto !important;
+                min-height: 88px !important;
+                padding-left: 0.55rem !important;
+                padding-right: 0.55rem !important;
+                padding-top: 0.3rem !important;
+                padding-bottom: 0.35rem !important;
+              }
+              .drawing-back-button {
+                flex: 0 0 40px;
+                height: 40px !important;
+                order: 1;
+                width: 40px !important;
+              }
+              .drawing-title {
+                flex: 1 1 0 !important;
+                font-size: 0.95rem !important;
+                line-height: 1.05 !important;
+                left: auto;
+                max-width: none;
+                order: 2;
+                padding-inline: 0.25rem;
+                position: static;
+                transform: none;
+                white-space: normal;
+                width: auto;
+              }
+              .drawing-top-action {
+                flex: 1 0 100% !important;
+                justify-content: center !important;
+                margin-left: 0;
+                min-width: 0 !important;
+                order: 4;
+              }
+              .photo-action-pill {
+                border-radius: 16px !important;
+                padding: 2px !important;
+              }
+              .photo-action-button {
+                height: 38px !important;
+                width: 54px !important;
+              }
+              .photo-action-button svg {
+                height: 19px !important;
+                width: 19px !important;
+              }
+              .drawing-canvas-area {
+                align-items: flex-start !important;
+                padding: 0.45rem 0.5rem 0.25rem !important;
+                overflow: hidden !important;
+              }
+              .drawing-stage {
+                width: min(92vw, 410px, calc(100dvh - 224px));
+                gap: 0;
+              }
+              .drawing-toolbar {
+                padding-left: 0.25rem !important;
+                padding-right: 0.25rem !important;
+                padding-top: 0.35rem !important;
+                padding-bottom: 0.35rem !important;
+              }
+              .drawing-control-row {
+                flex-wrap: nowrap;
+                gap: 0.1rem;
+                justify-content: center !important;
+                margin-bottom: 0 !important;
+                overflow-x: visible;
+                scrollbar-width: none;
+                touch-action: pan-x;
+              }
+              .drawing-control-row::-webkit-scrollbar {
+                display: none;
+              }
+              .tool-group,
+              .size-group,
+              .action-group {
+                gap: 0.1rem;
+              }
+              .tool-button,
+              .size-button {
+                width: 38px !important;
+                height: 38px !important;
+                border-width: 1.5px !important;
+              }
+              .tool-button svg {
+                width: 25px;
+                height: 25px;
+              }
+              .color-strip {
+                margin-bottom: 0.25rem;
+              }
+              .color-row {
+                flex-flow: row nowrap !important;
+                gap: 0.28rem !important;
+                justify-content: center !important;
+                margin-bottom: 0 !important;
+                overflow-x: visible !important;
+                padding-bottom: 0;
+              }
+              .color-swatch {
+                width: 28px !important;
+                height: 28px !important;
+                flex: 0 0 28px;
+                border-width: 2px !important;
+              }
+              .utility-action {
+                width: 44px !important;
+                height: 38px !important;
+                flex-basis: 44px;
+                font-size: 9.5px !important;
+                border-width: 1.5px !important;
+              }
+              .header-done {
+                height: 38px !important;
+                min-width: 56px !important;
+                order: 3;
+                padding-inline: 0.65rem !important;
+              }
+            }
+            @supports (-webkit-touch-callout: none) {
+              @media (max-width: 540px) {
+                .drawing-shell {
+                  padding-bottom: calc(env(safe-area-inset-bottom) + 48px) !important;
+                }
+              }
+            }
             @media (max-width: 480px) and (max-height: 720px) {
               .drawing-stage {
-                width: min(78vw, 304px);
-                gap: 0.5rem;
+                width: min(90vw, 360px, calc(100dvh - 212px));
+                gap: 0;
               }
-              .drawing-prompt {
-                padding-top: 0.65rem;
-                padding-bottom: 0.65rem;
+            }
+            @media (max-width: 360px) {
+              .drawing-title {
+                font-size: 0.84rem !important;
+              }
+              .tool-button,
+              .size-button {
+                width: 34px !important;
+                height: 34px !important;
+              }
+              .tool-button svg {
+                width: 23px;
+                height: 23px;
+              }
+              .color-swatch {
+                width: 22px !important;
+                height: 22px !important;
+                flex-basis: 22px;
+              }
+              .utility-action {
+                width: 36px !important;
+                height: 34px !important;
+                flex-basis: 36px;
+                font-size: 8.5px !important;
               }
             }
             @keyframes tfn-sparkle {
@@ -581,17 +876,44 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
 
         {/* Tools bar */}
         <div
-          className="px-3 pt-3 pb-4"
+          className="drawing-toolbar px-3 pt-2 pb-3"
           style={{
             background: c.cream,
             borderTop: `1px solid ${c.border}`,
-            paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+            paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))',
           }}
         >
-          {/* Row 1: tools + sizes */}
-          <div className="flex items-center justify-center gap-2 mb-3 flex-wrap">
+          {/* Row 1: color swatches */}
+          <div className="relative color-strip">
+            <div className="color-row flex items-center justify-center gap-1.5 mb-3 flex-wrap">
+              {SWATCHES.map((s) => (
+                <button
+                  key={s.name}
+                  type="button"
+                  onClick={() => setColor(s.hex)}
+                  aria-label={`Color ${s.name}`}
+                  aria-pressed={color === s.hex}
+                  className="color-swatch rounded-full active:scale-95"
+                  style={{
+                    width: 38,
+                    height: 38,
+                    background: s.hex,
+                    border:
+                      color === s.hex
+                        ? `3px solid ${c.gold}`
+                        : `2px solid ${c.border}`,
+                    padding: 0,
+                  }}
+                />
+              ))}
+            </div>
+            <div className="mobile-scroll-cue" aria-hidden />
+          </div>
+
+          {/* Row 2: tools + sizes + actions */}
+          <div className="drawing-control-row flex items-center justify-center gap-2 mb-2 flex-wrap">
             {/* Tool picker */}
-            <div className="flex items-center justify-center gap-2">
+            <div className="tool-group flex items-center justify-center gap-2">
               {TOOL_ORDER.map((t) => (
                 <button
                   key={t}
@@ -603,7 +925,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                   }}
                   aria-label={`${t} tool`}
                   aria-pressed={tool === t && !eraser}
-                  className="rounded-2xl active:scale-95"
+                  className="tool-button rounded-2xl active:scale-95"
                   style={{
                     width: 52,
                     height: 52,
@@ -626,7 +948,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             </div>
 
             {/* Size picker */}
-            <div className="flex items-center justify-center gap-2">
+            <div className="size-group flex items-center justify-center gap-2">
               {[0, 1, 2].map((i) => {
                 const s = BRUSH_SIZES[tool][i as BrushSizeIndex];
                 const isActive = sizeIndex === i && !eraser;
@@ -640,7 +962,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                     }}
                     aria-label={`Size ${s} pixels`}
                     aria-pressed={isActive}
-                    className="rounded-full active:scale-95 flex items-center justify-center"
+                    className="size-button rounded-full active:scale-95 flex items-center justify-center"
                     style={{
                       width: 48,
                       height: 48,
@@ -662,116 +984,69 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                 );
               })}
             </div>
-          </div>
 
-          {/* Row 2: color swatches */}
-          <div className="flex items-center justify-center gap-1.5 mb-3 flex-wrap">
-            {SWATCHES.map((s) => (
+            <div className="action-group flex items-center justify-center gap-2">
               <button
-                key={s.name}
                 type="button"
-                onClick={() => setColor(s.hex)}
-                aria-label={`Color ${s.name}`}
-                aria-pressed={color === s.hex}
-                className="rounded-full active:scale-95"
+                onClick={() => setEraser((e) => !e)}
+                aria-pressed={eraser}
+                className="utility-action rounded-full active:scale-95"
                 style={{
-                  width: 38,
-                  height: 38,
-                  background: s.hex,
-                  border:
-                    color === s.hex
-                      ? `3px solid ${c.gold}`
-                      : `2px solid ${c.border}`,
+                  width: 52,
+                  height: 52,
+                  background: eraser ? c.goldSoft : c.cream,
+                  border: `2px solid ${eraser ? c.gold : c.border}`,
+                  color: c.brown,
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 11,
+                  fontWeight: 500,
                   padding: 0,
                 }}
-              />
-            ))}
+                aria-label="Eraser"
+              >
+                Erase
+              </button>
+              <button
+                type="button"
+                onClick={handleUndo}
+                className="utility-action rounded-full active:scale-95"
+                style={{
+                  width: 52,
+                  height: 52,
+                  background: c.cream,
+                  border: `2px solid ${c.border}`,
+                  color: c.brown,
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 11,
+                  fontWeight: 500,
+                  padding: 0,
+                }}
+                aria-label="Undo"
+              >
+                Undo
+              </button>
+              <button
+                type="button"
+                onClick={handleClear}
+                className="utility-action rounded-full active:scale-95"
+                style={{
+                  width: 52,
+                  height: 52,
+                  background: c.cream,
+                  border: `2px solid ${c.border}`,
+                  color: c.brown,
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 11,
+                  fontWeight: 500,
+                  padding: 0,
+                }}
+                aria-label="Clear canvas"
+              >
+                Clear
+              </button>
+            </div>
           </div>
 
-          {/* Row 3: eraser + undo + done */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setEraser((e) => !e)}
-              aria-pressed={eraser}
-              className="rounded-full active:scale-95"
-              style={{
-                width: 52,
-                height: 52,
-                background: eraser ? c.goldSoft : c.cream,
-                border: `2px solid ${eraser ? c.gold : c.border}`,
-                color: c.brown,
-                fontFamily: 'var(--font-body)',
-                fontSize: 11,
-                fontWeight: 500,
-                padding: 0,
-              }}
-              aria-label="Eraser"
-            >
-              Erase
-            </button>
-            <button
-              type="button"
-              onClick={handleUndo}
-              className="rounded-full active:scale-95"
-              style={{
-                width: 52,
-                height: 52,
-                background: c.cream,
-                border: `2px solid ${c.border}`,
-                color: c.brown,
-                fontFamily: 'var(--font-body)',
-                fontSize: 11,
-                fontWeight: 500,
-                padding: 0,
-              }}
-              aria-label="Undo"
-            >
-              Undo
-            </button>
-            <button
-              type="button"
-              onClick={handleClear}
-              className="rounded-full active:scale-95"
-              style={{
-                width: 52,
-                height: 52,
-                background: c.cream,
-                border: `2px solid ${c.border}`,
-                color: c.brown,
-                fontFamily: 'var(--font-body)',
-                fontSize: 11,
-                fontWeight: 500,
-                padding: 0,
-              }}
-              aria-label="Clear canvas"
-            >
-              Clear
-            </button>
-            <button
-              type="button"
-              onClick={handleDone}
-              disabled={!hasStrokes}
-              className="flex-1 rounded-full active:scale-[0.98]"
-              style={{
-                minHeight: 56,
-                background: hasStrokes ? c.gold : c.border,
-                color: c.cream,
-                fontFamily: 'var(--font-display)',
-                fontSize: 18,
-                fontWeight: 500,
-                letterSpacing: '-0.01em',
-                border: 'none',
-                padding: 0,
-                transition: 'background 0.2s, opacity 0.2s',
-                opacity: hasStrokes ? 1 : 0.6,
-                cursor: hasStrokes ? 'pointer' : 'not-allowed',
-              }}
-              aria-label="I'm done drawing"
-            >
-              I&apos;m done drawing
-            </button>
-          </div>
         </div>
       </div>
     );
