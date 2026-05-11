@@ -499,7 +499,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
               padding: '0 0.9rem',
               opacity: hasStrokes ? 1 : 0.6,
             }}
-            aria-label="I'm done drawing"
+            aria-label="Done drawing"
           >
             Done
           </button>
@@ -535,26 +535,13 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
               <p
                 style={{
                   margin: 0,
-                  color: c.gold,
-                  fontFamily: 'var(--font-body)',
-                  fontSize: 11,
-                  fontWeight: 800,
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                Tiny tooth memory
-              </p>
-              <p
-                style={{
-                  margin: '0.25rem 0 0',
                   color: c.brownSoft,
                   fontFamily: 'var(--font-display)',
                   fontSize: 'clamp(1rem, 2.2vw, 1.2rem)',
                   lineHeight: 1.2,
                 }}
               >
-                Draw the tooth, a feeling, or a symbol.
+                Start with a photo or your imagination. Draw anything you want to enhance next.
               </p>
             </div>
             <div
@@ -654,23 +641,31 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             .utility-action {
               flex: 0 0 52px;
             }
-            .drawing-done {
-              white-space: normal;
-              line-height: 1.05;
-            }
             .header-done {
-              display: none;
+              align-items: center;
+              display: flex;
+              flex-shrink: 0;
+              justify-content: center;
             }
             .phone-done-anchor {
-              flex: 1 1 8rem;
-            }
-            .done-label-short {
-              display: none;
+              flex: 0 0 auto;
             }
             .drawing-toolbar {
               flex: 0 0 auto;
               overflow: visible;
               touch-action: auto;
+            }
+            .drawing-control-row {
+              flex-wrap: nowrap !important;
+              overflow-x: auto;
+              scrollbar-width: none;
+              touch-action: pan-x;
+            }
+            .drawing-control-row::-webkit-scrollbar {
+              display: none;
+            }
+            .action-group {
+              flex-shrink: 0;
             }
             .mobile-scroll-cue {
               position: absolute;
@@ -704,83 +699,72 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                 overflow: hidden !important;
               }
               .drawing-stage {
-                width: min(82vw, 360px, calc(100svh - 196px));
+                width: min(84vw, 380px, calc(100svh - 150px));
                 gap: 0.4rem;
               }
               .drawing-prompt {
                 display: none;
               }
               .drawing-toolbar {
-                padding-top: 0.3rem !important;
+                padding-left: 0.45rem !important;
+                padding-right: 0.45rem !important;
+                padding-top: 0.35rem !important;
                 padding-bottom: max(0.35rem, env(safe-area-inset-bottom)) !important;
               }
-              .drawing-tool-row {
+              .drawing-control-row {
                 flex-wrap: nowrap;
                 gap: 0.3rem;
-                margin-bottom: 0.35rem !important;
+                margin-bottom: 0.3rem !important;
                 overflow-x: auto;
                 scrollbar-width: none;
                 touch-action: pan-x;
               }
-              .drawing-tool-row::-webkit-scrollbar {
+              .drawing-control-row::-webkit-scrollbar {
                 display: none;
               }
               .tool-group,
-              .size-group {
-                gap: 0.3rem;
+              .size-group,
+              .action-group {
+                gap: 0.25rem;
               }
               .tool-button,
               .size-button {
-                width: 40px !important;
-                height: 40px !important;
+                width: 36px !important;
+                height: 36px !important;
                 border-width: 1.5px !important;
               }
               .tool-button svg {
-                width: 28px;
-                height: 28px;
+                width: 25px;
+                height: 25px;
               }
               .color-row {
-                margin-bottom: 0.35rem !important;
-                padding-bottom: 0.1rem;
+                gap: 0.25rem !important;
+                justify-content: center !important;
+                margin-bottom: 0 !important;
+                padding-bottom: 0;
               }
               .color-swatch {
-                width: 30px !important;
-                height: 30px !important;
-                flex: 0 0 30px;
+                width: 25px !important;
+                height: 25px !important;
+                flex: 0 0 25px;
                 border-width: 2px !important;
               }
               .utility-action {
-                width: 42px !important;
-                height: 42px !important;
-                flex-basis: 42px;
-                font-size: 10px !important;
+                width: 38px !important;
+                height: 36px !important;
+                flex-basis: 38px;
+                font-size: 9px !important;
                 border-width: 1.5px !important;
               }
-              .drawing-done {
-                min-height: 42px !important;
-                font-size: 15px !important;
-                padding-inline: 0.65rem !important;
-                position: relative;
-                z-index: 1;
-              }
-              .done-label-full {
-                display: none;
-              }
-              .done-label-short {
-                display: inline;
-              }
               .header-done {
-                display: flex !important;
-                align-items: center;
-                justify-content: center;
-              }
-              .desktop-done {
-                display: none !important;
+                height: 38px !important;
+                min-width: 58px !important;
+                padding-inline: 0.7rem !important;
               }
             }
             @media (max-width: 480px) and (max-height: 720px) {
               .drawing-stage {
-                width: min(78vw, 320px, calc(100svh - 176px));
+                width: min(80vw, 330px, calc(100svh - 140px));
                 gap: 0.35rem;
               }
               .drawing-prompt {
@@ -829,8 +813,8 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))',
           }}
         >
-          {/* Row 1: tools + sizes */}
-          <div className="drawing-tool-row flex items-center justify-center gap-2 mb-3 flex-wrap">
+          {/* Row 1: tools + sizes + actions */}
+          <div className="drawing-control-row flex items-center justify-center gap-2 mb-2 flex-wrap">
             {/* Tool picker */}
             <div className="tool-group flex items-center justify-center gap-2">
               {TOOL_ORDER.map((t) => (
@@ -903,6 +887,67 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
                 );
               })}
             </div>
+
+            <div className="action-group flex items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => setEraser((e) => !e)}
+                aria-pressed={eraser}
+                className="utility-action rounded-full active:scale-95"
+                style={{
+                  width: 52,
+                  height: 52,
+                  background: eraser ? c.goldSoft : c.cream,
+                  border: `2px solid ${eraser ? c.gold : c.border}`,
+                  color: c.brown,
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 11,
+                  fontWeight: 500,
+                  padding: 0,
+                }}
+                aria-label="Eraser"
+              >
+                Erase
+              </button>
+              <button
+                type="button"
+                onClick={handleUndo}
+                className="utility-action rounded-full active:scale-95"
+                style={{
+                  width: 52,
+                  height: 52,
+                  background: c.cream,
+                  border: `2px solid ${c.border}`,
+                  color: c.brown,
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 11,
+                  fontWeight: 500,
+                  padding: 0,
+                }}
+                aria-label="Undo"
+              >
+                Undo
+              </button>
+              <button
+                type="button"
+                onClick={handleClear}
+                className="utility-action rounded-full active:scale-95"
+                style={{
+                  width: 52,
+                  height: 52,
+                  background: c.cream,
+                  border: `2px solid ${c.border}`,
+                  color: c.brown,
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 11,
+                  fontWeight: 500,
+                  padding: 0,
+                }}
+                aria-label="Clear canvas"
+              >
+                Clear
+              </button>
+            </div>
           </div>
 
           {/* Row 2: color swatches */}
@@ -932,94 +977,6 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             <div className="mobile-scroll-cue" aria-hidden />
           </div>
 
-          {/* Row 3: eraser + undo + done */}
-          <div className="drawing-actions flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setEraser((e) => !e)}
-              aria-pressed={eraser}
-              className="utility-action rounded-full active:scale-95"
-              style={{
-                width: 52,
-                height: 52,
-                background: eraser ? c.goldSoft : c.cream,
-                border: `2px solid ${eraser ? c.gold : c.border}`,
-                color: c.brown,
-                fontFamily: 'var(--font-body)',
-                fontSize: 11,
-                fontWeight: 500,
-                padding: 0,
-              }}
-              aria-label="Eraser"
-            >
-              Erase
-            </button>
-            <button
-              type="button"
-              onClick={handleUndo}
-              className="utility-action rounded-full active:scale-95"
-              style={{
-                width: 52,
-                height: 52,
-                background: c.cream,
-                border: `2px solid ${c.border}`,
-                color: c.brown,
-                fontFamily: 'var(--font-body)',
-                fontSize: 11,
-                fontWeight: 500,
-                padding: 0,
-              }}
-              aria-label="Undo"
-            >
-              Undo
-            </button>
-            <button
-              type="button"
-              onClick={handleClear}
-              className="utility-action rounded-full active:scale-95"
-              style={{
-                width: 52,
-                height: 52,
-                background: c.cream,
-                border: `2px solid ${c.border}`,
-                color: c.brown,
-                fontFamily: 'var(--font-body)',
-                fontSize: 11,
-                fontWeight: 500,
-                padding: 0,
-              }}
-              aria-label="Clear canvas"
-            >
-              Clear
-            </button>
-            <button
-              type="button"
-              onClick={handleDone}
-              disabled={!hasStrokes}
-              className="drawing-done desktop-done flex-1 rounded-full active:scale-[0.98]"
-              style={{
-                minHeight: 56,
-                minWidth: 0,
-                background: hasStrokes ? c.gold : c.border,
-                color: c.cream,
-                fontFamily: 'var(--font-display)',
-                fontSize: 18,
-                fontWeight: 500,
-                letterSpacing: '-0.01em',
-                border: 'none',
-                padding: 0,
-                transition: 'background 0.2s, opacity 0.2s',
-                opacity: hasStrokes ? 1 : 0.6,
-                cursor: hasStrokes ? 'pointer' : 'not-allowed',
-              }}
-              aria-label="I'm done drawing"
-            >
-              <span className="done-label-full">I&apos;m done drawing</span>
-              <span className="done-label-short" aria-hidden>
-                Done
-              </span>
-            </button>
-          </div>
         </div>
       </div>
     );

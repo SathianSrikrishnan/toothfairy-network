@@ -43,7 +43,7 @@ test('draw canvas avoids brittle short-phone viewport math', () => {
 
 test('draw canvas has a compact short-phone layout', () => {
   assert.match(canvasSource, /@media \(max-width: 480px\) and \(max-height: 720px\)/);
-  assert.match(canvasSource, /width:\s*min\(78vw, 320px, calc\(100svh - 176px\)\)/);
+  assert.match(canvasSource, /width:\s*min\(80vw, 330px, calc\(100svh - 140px\)\)/);
   assert.match(canvasSource, /\.drawing-prompt\s*\{\s*display:\s*none/);
 });
 
@@ -55,7 +55,7 @@ test('draw controls stay reachable on narrow phones', () => {
   assert.match(canvasSource, /className="drawing-toolbar/);
   assert.match(canvasSource, /className="color-row/);
   assert.match(canvasSource, /overflow-x:\s*auto/);
-  assert.match(canvasSource, /done-label-short/);
+  assert.match(canvasSource, /header-done/);
   assert.match(canvasSource, /@media \(max-width: 540px\)/);
   assert.doesNotMatch(canvasSource, /max-height:\s*44dvh/);
 });
@@ -64,12 +64,21 @@ test('phone layout keeps colors and done in visible fixed rows', () => {
   assert.match(canvasSource, /\.mobile-scroll-cue/);
   assert.match(canvasSource, /\.phone-done-anchor/);
   assert.match(canvasSource, /\.header-done/);
-  assert.match(canvasSource, /\.desktop-done/);
+  assert.match(canvasSource, /\.drawing-control-row/);
+  assert.match(canvasSource, /\.action-group/);
+  assert.doesNotMatch(canvasSource, /className="drawing-done/);
+  assert.doesNotMatch(canvasSource, /I&apos;m done drawing/);
   assert.match(canvasSource, /flex-wrap:\s*nowrap\s*!important/);
-  assert.match(canvasSource, /width:\s*min\(82vw, 360px, calc\(100svh - 196px\)\)/);
+  assert.match(canvasSource, /width:\s*min\(84vw, 380px, calc\(100svh - 150px\)\)/);
   assert.match(canvasSource, /padding-bottom:\s*max\(0\.35rem, env\(safe-area-inset-bottom\)\)/);
   assert.match(canvasSource, /height:\s*100svh\s*!important/);
   assert.match(canvasSource, /overflow:\s*hidden\s*!important/);
+});
+
+test('draw prompt uses photo and imagination copy without the old eyebrow', () => {
+  assert.doesNotMatch(canvasSource, /Tiny tooth memory/);
+  assert.match(canvasSource, /Start with a photo or your imagination/);
+  assert.match(canvasSource, /Draw anything you want to enhance next/);
 });
 
 test('draw page exposes photo capture and passes it into the V2 canvas', () => {

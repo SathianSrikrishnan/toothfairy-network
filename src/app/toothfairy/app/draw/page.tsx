@@ -232,8 +232,8 @@ export default function DrawPage() {
               title="Choose photo"
               className="photo-action-button flex items-center justify-center active:scale-95"
               style={{
-                width: 68,
-                height: 48,
+                width: 56,
+                height: 44,
                 flexDirection: 'column',
                 gap: 1,
                 borderRadius: 14,
@@ -241,12 +241,12 @@ export default function DrawPage() {
                 border: 'none',
                 color: 'oklch(30% 0.035 65)',
                 fontFamily: "var(--font-body, 'Alegreya Sans'), sans-serif",
-                fontSize: 10,
+                fontSize: 9,
                 fontWeight: 700,
                 lineHeight: 1,
               }}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <rect
                   x="4"
                   y="5"
@@ -274,8 +274,8 @@ export default function DrawPage() {
               title="Take photo"
               className="photo-action-button flex items-center justify-center active:scale-95"
               style={{
-                width: 68,
-                height: 48,
+                width: 56,
+                height: 44,
                 flexDirection: 'column',
                 gap: 1,
                 borderRadius: 14,
@@ -287,12 +287,12 @@ export default function DrawPage() {
                 }`,
                 color: photo ? 'oklch(72% 0.145 75)' : 'oklch(30% 0.035 65)',
                 fontFamily: "var(--font-body, 'Alegreya Sans'), sans-serif",
-                fontSize: 10,
+                fontSize: 9,
                 fontWeight: 700,
                 lineHeight: 1,
               }}
             >
-              <svg width="25" height="25" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <svg width="23" height="23" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path
                   d="M4.5 8.5h3l1.4-2h6.2l1.4 2h3a1.8 1.8 0 0 1 1.8 1.8v7.4a1.8 1.8 0 0 1-1.8 1.8h-15a1.8 1.8 0 0 1-1.8-1.8v-7.4a1.8 1.8 0 0 1 1.8-1.8Z"
                   stroke="currentColor"
