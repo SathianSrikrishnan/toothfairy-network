@@ -450,7 +450,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             type="button"
             onClick={onBack}
             aria-label="Back"
-            className="flex items-center justify-center rounded-full active:scale-95"
+            className="drawing-back-button flex items-center justify-center rounded-full active:scale-95"
             style={{
               width: 48,
               height: 48,
@@ -475,10 +475,10 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
               textAlign: 'center',
             }}
           >
-            Draw your tooth
+            Start with a photo or draw anything.
           </h1>
           <div
-            className="flex items-center justify-end"
+            className="drawing-top-action flex items-center justify-end"
             style={{ minWidth: 'max-content', flexShrink: 0 }}
           >
             {topAction}
@@ -525,26 +525,6 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
               maxWidth: '100%',
             }}
           >
-            <div
-              className="drawing-prompt w-full rounded-2xl px-4 py-3 text-center"
-              style={{
-                background: 'oklch(99% 0.006 82 / 0.82)',
-                border: `1px solid ${c.border}`,
-                boxShadow: `0 8px 26px ${c.shadow}`,
-              }}
-            >
-              <p
-                style={{
-                  margin: 0,
-                  color: c.brownSoft,
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 'clamp(1rem, 2.2vw, 1.2rem)',
-                  lineHeight: 1.2,
-                }}
-              >
-                Start with a photo or draw anything.
-              </p>
-            </div>
             <div
               className="relative"
               style={{
@@ -621,7 +601,22 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             ))}
           </div>
 
-          <style jsx>{`
+          <style jsx global>{`
+            .drawing-header {
+              position: relative;
+            }
+            .drawing-title {
+              left: 50%;
+              max-width: min(52vw, 540px);
+              pointer-events: none;
+              position: absolute;
+              transform: translateX(-50%);
+              white-space: nowrap;
+              width: max-content;
+            }
+            .drawing-top-action {
+              margin-left: auto;
+            }
             .drawing-canvas-area {
               padding: 0.65rem 0.75rem;
             }
@@ -632,7 +627,7 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
               -webkit-overflow-scrolling: touch;
               scrollbar-width: none;
               flex-wrap: nowrap !important;
-              justify-content: flex-start !important;
+              justify-content: center !important;
               overflow-x: auto;
               touch-action: pan-x;
             }
@@ -686,40 +681,81 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
             }
             @media (max-width: 540px) {
               .drawing-shell {
-                height: 100svh !important;
-                min-height: 100svh !important;
+                height: 100dvh !important;
+                min-height: 100dvh !important;
+                max-height: 100dvh !important;
                 overflow: hidden !important;
               }
               .drawing-header {
-                height: 54px !important;
+                align-content: center;
+                flex-wrap: wrap;
+                gap: 0.25rem !important;
+                height: auto !important;
+                min-height: 88px !important;
                 padding-left: 0.55rem !important;
                 padding-right: 0.55rem !important;
+                padding-top: 0.3rem !important;
+                padding-bottom: 0.35rem !important;
+              }
+              .drawing-back-button {
+                flex: 0 0 40px;
+                height: 40px !important;
+                order: 1;
+                width: 40px !important;
               }
               .drawing-title {
-                font-size: 1rem !important;
+                flex: 1 1 0 !important;
+                font-size: 0.95rem !important;
+                line-height: 1.05 !important;
+                left: auto;
+                max-width: none;
+                order: 2;
+                padding-inline: 0.25rem;
+                position: static;
+                transform: none;
+                white-space: normal;
+                width: auto;
+              }
+              .drawing-top-action {
+                flex: 1 0 100% !important;
+                justify-content: center !important;
+                margin-left: 0;
+                min-width: 0 !important;
+                order: 4;
+              }
+              .photo-action-pill {
+                border-radius: 16px !important;
+                padding: 2px !important;
+              }
+              .photo-action-button {
+                height: 38px !important;
+                width: 54px !important;
+              }
+              .photo-action-button svg {
+                height: 19px !important;
+                width: 19px !important;
               }
               .drawing-canvas-area {
-                padding: 0.35rem 0.5rem !important;
+                align-items: flex-start !important;
+                padding: 0.45rem 0.5rem 0.25rem !important;
                 overflow: hidden !important;
               }
               .drawing-stage {
-                width: min(88vw, 400px, calc(100svh - 154px));
-                gap: 0.4rem;
-              }
-              .drawing-prompt {
-                display: none;
+                width: min(92vw, 410px, calc(100dvh - 224px));
+                gap: 0;
               }
               .drawing-toolbar {
-                padding-left: 0.45rem !important;
-                padding-right: 0.45rem !important;
-                padding-top: 0.35rem !important;
-                padding-bottom: max(0.35rem, env(safe-area-inset-bottom)) !important;
+                padding-left: 0.4rem !important;
+                padding-right: 0.4rem !important;
+                padding-top: 0.25rem !important;
+                padding-bottom: 0.25rem !important;
               }
               .drawing-control-row {
                 flex-wrap: nowrap;
-                gap: 0.3rem;
+                gap: 0.25rem;
+                justify-content: center !important;
                 margin-bottom: 0 !important;
-                overflow-x: auto;
+                overflow-x: visible;
                 scrollbar-width: none;
                 touch-action: pan-x;
               }
@@ -733,61 +769,61 @@ const DrawingCanvasV2 = forwardRef<DrawingCanvasV2Ref, DrawingCanvasV2Props>(
               }
               .tool-button,
               .size-button {
-                width: 36px !important;
-                height: 36px !important;
+                width: 34px !important;
+                height: 34px !important;
                 border-width: 1.5px !important;
               }
               .tool-button svg {
-                width: 25px;
-                height: 25px;
+                width: 23px;
+                height: 23px;
               }
               .color-strip {
-                margin-bottom: 0.3rem;
+                margin-bottom: 0.15rem;
               }
               .color-row {
-                gap: 0.25rem !important;
+                flex-flow: row nowrap !important;
+                gap: 0.22rem !important;
                 justify-content: center !important;
                 margin-bottom: 0 !important;
+                overflow-x: visible !important;
                 padding-bottom: 0;
               }
               .color-swatch {
-                width: 24px !important;
-                height: 24px !important;
-                flex: 0 0 24px;
+                width: 22px !important;
+                height: 22px !important;
+                flex: 0 0 22px;
                 border-width: 2px !important;
               }
               .utility-action {
-                width: 38px !important;
-                height: 36px !important;
-                flex-basis: 38px;
-                font-size: 9px !important;
+                width: 36px !important;
+                height: 34px !important;
+                flex-basis: 36px;
+                font-size: 8.5px !important;
                 border-width: 1.5px !important;
               }
               .header-done {
                 height: 38px !important;
-                min-width: 58px !important;
-                padding-inline: 0.7rem !important;
+                min-width: 56px !important;
+                order: 3;
+                padding-inline: 0.65rem !important;
               }
             }
             @supports (-webkit-touch-callout: none) {
               @media (max-width: 540px) {
                 .drawing-shell {
-                  padding-bottom: 44px !important;
+                  padding-bottom: calc(env(safe-area-inset-bottom) + 76px) !important;
                 }
               }
             }
             @media (max-width: 480px) and (max-height: 720px) {
               .drawing-stage {
-                width: min(84vw, 350px, calc(100svh - 144px));
-                gap: 0.35rem;
-              }
-              .drawing-prompt {
-                display: none;
+                width: min(90vw, 360px, calc(100dvh - 212px));
+                gap: 0;
               }
             }
             @media (max-width: 360px) {
               .drawing-title {
-                display: none;
+                font-size: 0.84rem !important;
               }
             }
             @keyframes tfn-sparkle {
