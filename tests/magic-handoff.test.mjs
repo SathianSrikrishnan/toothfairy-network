@@ -3,20 +3,38 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
 const resultPage = readFileSync('src/app/toothfairy/app/draw/result/page.tsx', 'utf8');
+const previewPage = readFileSync('src/app/toothfairy/app/draw/preview/page.tsx', 'utf8');
 const appPage = readFileSync('src/app/toothfairy/app/page.tsx', 'utf8');
 
 test('keeping a Magic Studio result stores a main-app handoff state', () => {
   assert.match(resultPage, /const FLOW_STORAGE_KEY = ['"]tfn-flow-state['"]/);
-  assert.match(resultPage, /localStorage\.setItem\(\s*FLOW_STORAGE_KEY,\s*JSON\.stringify/);
+  assert.match(resultPage, /const flowState = JSON\.stringify/);
+  assert.match(resultPage, /localStorage\.setItem\(FLOW_STORAGE_KEY,\s*flowState\)/);
+  assert.match(resultPage, /sessionStorage\.setItem\(FLOW_STORAGE_KEY,\s*flowState\)/);
   assert.match(resultPage, /previewImage:\s*finalImage/);
   assert.match(resultPage, /fromMagicStudio:\s*true/);
   assert.match(resultPage, /step:\s*['"]setup['"]/);
+});
+
+test('Magic result page survives photo-backed canvas localStorage eviction', () => {
+  assert.match(resultPage, /sessionStorage\.getItem\(LATEST_DRAWING_KEY\)/);
+  assert.match(resultPage, /localStorage\.getItem\(FINAL_DRAWING_KEY\)/);
+  assert.doesNotMatch(resultPage, /if \(!original \|\| !selected\)/);
+  assert.match(resultPage, /if \(!selected\)/);
+});
+
+test('Magic Studio keeps a visible progress status during long multi-style runs', () => {
+  assert.match(previewPage, /aria-live=["']polite["']/);
+  assert.match(previewPage, /role=["']status["']/);
+  assert.match(previewPage, /Magic is still working/);
+  assert.match(previewPage, /enhanceState\.kind === ['"]loading['"]/);
 });
 
 test('main app treats Magic Studio artwork as already-created art', () => {
   assert.match(appPage, /const FINAL_DRAWING_KEY = ['"]toothfairy-final-drawing['"]/);
   assert.match(appPage, /function hasSelectedArtworkHandoff/);
   assert.match(appPage, /setMagicArtworkReady\(hasSelectedArtworkHandoff/);
+  assert.match(appPage, /sessionStorage\.getItem\(FINAL_DRAWING_KEY\)/);
   assert.doesNotMatch(appPage, /localStorage\.getItem\(LATEST_DRAWING_KEY\)/);
 });
 

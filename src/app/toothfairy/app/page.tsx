@@ -412,7 +412,9 @@ export default function ToothFairyApp() {
     try {
       const saved = localStorage.getItem(FLOW_STORAGE_KEY)
       const state = parseStoredFlowState(saved)
-      const finalDrawing = localStorage.getItem(FINAL_DRAWING_KEY)
+      const finalDrawing =
+        localStorage.getItem(FINAL_DRAWING_KEY) ||
+        sessionStorage.getItem(FINAL_DRAWING_KEY)
       const storedChildName = state?.childName
       const storedChildDob = state?.childDob
       const storedChildPhoto = state?.childPhoto
@@ -435,7 +437,9 @@ export default function ToothFairyApp() {
   useEffect(() => {
     if (typeof window === "undefined") return
     const storedFlowState = parseStoredFlowState(localStorage.getItem(FLOW_STORAGE_KEY))
-    const finalDrawing = localStorage.getItem(FINAL_DRAWING_KEY)
+    const finalDrawing =
+      localStorage.getItem(FINAL_DRAWING_KEY) ||
+      sessionStorage.getItem(FINAL_DRAWING_KEY)
 
     if (!hasSelectedArtworkHandoff(storedFlowState, finalDrawing)) {
       router.replace("/toothfairy/app/draw?from=app")
@@ -457,6 +461,7 @@ export default function ToothFairyApp() {
 
   const clearFlowState = useCallback(() => {
     try { localStorage.removeItem(FLOW_STORAGE_KEY) } catch {}
+    try { sessionStorage.removeItem(FLOW_STORAGE_KEY) } catch {}
   }, [])
 
   const clearAllFlowKeys = useCallback(() => {
@@ -473,6 +478,7 @@ export default function ToothFairyApp() {
     ]
     for (const k of keys) {
       try { localStorage.removeItem(k) } catch { /* ignore */ }
+      try { sessionStorage.removeItem(k) } catch { /* ignore */ }
     }
   }, [])
 

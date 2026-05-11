@@ -55,16 +55,27 @@ function generateSparkles(count: number, width: number, height: number): Sparkle
   return result;
 }
 
+function parseMagicResults(raw: string | null): MagicResult[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw) as MagicResult[];
+    return parsed.filter((item) => item?.enhancedImageUrl && item?.styleId);
+  } catch {
+    return [];
+  }
+}
+
 function readMagicResults(): MagicResult[] {
   try {
-    const raw = localStorage.getItem(MAGIC_RESULTS_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as MagicResult[];
-      const valid = parsed.filter((item) => item?.enhancedImageUrl && item?.styleId);
-      if (valid.length > 0) return valid;
-    }
+    const localResults = parseMagicResults(localStorage.getItem(MAGIC_RESULTS_KEY));
+    if (localResults.length > 0) return localResults;
 
-    const fallback = localStorage.getItem(LATEST_ENHANCED_KEY);
+    const sessionResults = parseMagicResults(sessionStorage.getItem(MAGIC_RESULTS_KEY));
+    if (sessionResults.length > 0) return sessionResults;
+
+    const fallback =
+      localStorage.getItem(LATEST_ENHANCED_KEY) ||
+      sessionStorage.getItem(LATEST_ENHANCED_KEY);
     if (fallback) {
       return [
         {
@@ -79,6 +90,26 @@ function readMagicResults(): MagicResult[] {
     // ignore corrupt localStorage
   }
   return [];
+}
+
+function readOriginalDrawing(): string | null {
+  try {
+    return (
+      localStorage.getItem(LATEST_DRAWING_KEY) ||
+      sessionStorage.getItem(LATEST_DRAWING_KEY) ||
+      localStorage.getItem(FINAL_DRAWING_KEY) ||
+      sessionStorage.getItem(FINAL_DRAWING_KEY)
+    );
+  } catch {
+    try {
+      return (
+        sessionStorage.getItem(LATEST_DRAWING_KEY) ||
+        sessionStorage.getItem(FINAL_DRAWING_KEY)
+      );
+    } catch {
+      return null;
+    }
+  }
 }
 
 export default function DrawResultPage() {
@@ -100,7 +131,7 @@ export default function DrawResultPage() {
       reducedMotion.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     }
     try {
-      setOriginal(localStorage.getItem(LATEST_DRAWING_KEY));
+      setOriginal(readOriginalDrawing());
       setResults(readMagicResults());
     } catch {
       // Private browsing
@@ -141,16 +172,27 @@ export default function DrawResultPage() {
 
   const handleKeep = () => {
     const finalImage = selected?.enhancedImageUrl || original || '';
+    if (!finalImage) return;
+    const flowState = JSON.stringify({
+      previewImage: finalImage,
+      step: 'setup',
+      fromMagicStudio: true,
+    });
     try {
+      sessionStorage.setItem(FINAL_DRAWING_KEY, finalImage);
+      sessionStorage.setItem(FLOW_STORAGE_KEY, flowState);
+      if (selected?.enhancedImageUrl) {
+        sessionStorage.setItem(LATEST_ENHANCED_KEY, selected.enhancedImageUrl);
+      }
+    } catch {
+      // Session storage is best-effort.
+    }
+    try {
+      if (selected?.enhancedImageUrl) {
+        localStorage.removeItem(LATEST_DRAWING_KEY);
+      }
       localStorage.setItem(FINAL_DRAWING_KEY, finalImage);
-      localStorage.setItem(
-        FLOW_STORAGE_KEY,
-        JSON.stringify({
-          previewImage: finalImage,
-          step: 'setup',
-          fromMagicStudio: true,
-        })
-      );
+      localStorage.setItem(FLOW_STORAGE_KEY, flowState);
       if (selected?.enhancedImageUrl) {
         localStorage.setItem(LATEST_ENHANCED_KEY, selected.enhancedImageUrl);
       }
@@ -162,7 +204,7 @@ export default function DrawResultPage() {
 
   if (!hydrated) return null;
 
-  if (!original || !selected) {
+  if (!selected) {
     return (
       <main
         className="min-h-screen w-full flex items-center justify-center px-5"
@@ -241,19 +283,21 @@ export default function DrawResultPage() {
           }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={original}
-            alt="Original drawing"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              background: c.cream,
-              zIndex: 1,
-            }}
-          />
+          {original && (
+            <img
+              src={original}
+              alt="Original drawing"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                background: c.cream,
+                zIndex: 1,
+              }}
+            />
+          )}
 
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -266,8 +310,8 @@ export default function DrawResultPage() {
               height: '100%',
               objectFit: 'contain',
               background: c.cream,
-              zIndex: showOriginal ? 0 : 2,
-              opacity: revealed && !showOriginal ? 1 : 0,
+              zIndex: showOriginal && original ? 0 : 2,
+              opacity: !original || (revealed && !showOriginal) ? 1 : 0,
               transition: reducedMotion.current
                 ? 'opacity 0.1s'
                 : 'opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -320,22 +364,24 @@ export default function DrawResultPage() {
           >
             {selectedStyle.label}
           </p>
-          <button
-            type="button"
-            onPointerDown={() => setShowOriginal(true)}
-            onPointerUp={() => setShowOriginal(false)}
-            onPointerLeave={() => setShowOriginal(false)}
-            className="text-sm underline"
-            style={{
-              fontFamily: 'var(--font-body)',
-              color: c.brownMuted,
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            Hold to see original
-          </button>
+          {original && (
+            <button
+              type="button"
+              onPointerDown={() => setShowOriginal(true)}
+              onPointerUp={() => setShowOriginal(false)}
+              onPointerLeave={() => setShowOriginal(false)}
+              className="text-sm underline"
+              style={{
+                fontFamily: 'var(--font-body)',
+                color: c.brownMuted,
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              Hold to see original
+            </button>
+          )}
         </div>
 
         {results.length > 1 && (

@@ -51,6 +51,26 @@ interface MagicResult {
   generationMs: number;
 }
 
+function rememberMagicResults(results: MagicResult[]) {
+  const first = results[0];
+  if (!first?.enhancedImageUrl) return;
+
+  const serialized = JSON.stringify(results);
+  try {
+    sessionStorage.setItem(MAGIC_RESULTS_KEY, serialized);
+    sessionStorage.setItem(LATEST_ENHANCED_KEY, first.enhancedImageUrl);
+  } catch {
+    // Session storage can be unavailable in private browsing.
+  }
+  try {
+    localStorage.setItem(MAGIC_RESULTS_KEY, serialized);
+    localStorage.setItem(LATEST_ENHANCED_KEY, first.enhancedImageUrl);
+  } catch {
+    // A photo-backed canvas can fill localStorage; sessionStorage carries
+    // the immediate handoff into the result page.
+  }
+}
+
 function signInNextPath() {
   if (typeof window === 'undefined') return '/toothfairy/app/draw/preview';
   return `${window.location.pathname}${window.location.search}`;
@@ -255,12 +275,7 @@ export default function DrawPreviewPage() {
 
     if (latestCredits) setCredits(latestCredits);
 
-    try {
-      localStorage.setItem(MAGIC_RESULTS_KEY, JSON.stringify(results));
-      localStorage.setItem(LATEST_ENHANCED_KEY, results[0].enhancedImageUrl);
-    } catch {
-      // localStorage might be full
-    }
+    rememberMagicResults(results);
 
     setEnhanceState({ kind: 'success' });
     router.push('/toothfairy/app/draw/result');
@@ -493,6 +508,8 @@ export default function DrawPreviewPage() {
 
         {enhanceState.kind === 'loading' && (
           <div
+            role="status"
+            aria-live="polite"
             className="text-center mb-6 rounded-2xl px-5 py-4"
             style={{ background: c.cream, border: `1px solid ${c.goldTint}` }}
           >
@@ -505,6 +522,17 @@ export default function DrawPreviewPage() {
               }}
             >
               Transforming {loadingStyle?.label ?? 'the drawing'}
+            </p>
+            <p
+              style={{
+                fontFamily: 'var(--font-body)',
+                color: c.brown,
+                fontSize: 13,
+                fontWeight: 700,
+                marginBottom: 4,
+              }}
+            >
+              Magic is still working
             </p>
             <p
               style={{
