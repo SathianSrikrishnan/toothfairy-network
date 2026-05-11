@@ -217,6 +217,28 @@ export function TFNHeader() {
           }
         }
 
+        @media (min-width: 760px) {
+          .tfn-header-inner {
+            display: grid;
+            grid-template-columns: minmax(210px, 1fr) auto minmax(210px, 1fr);
+            column-gap: clamp(1rem, 2vw, 2.25rem);
+          }
+
+          .brand {
+            justify-self: start;
+          }
+
+          .desktop-nav {
+            justify-self: center;
+            margin-left: 0;
+          }
+
+          .nav-actions {
+            justify-self: end;
+            margin-left: 0;
+          }
+        }
+
         @media (max-width: 420px) {
           .brand {
             gap: 0.46rem;

@@ -4,12 +4,13 @@ import styles from "./tanda-live-ritual-hero.module.css";
 const liveAssetRoot = "/toothfairy/animation/live-hero-v1";
 const liveAssetVersion = "asset-fix-2";
 const keepsakePreview = "https://gateway.irys.xyz/Z9_aFKhX6xpU1cZvw0h4u3zfJwhfJ1wiBf72KQWGF5k";
+const keepsakePreviewFallback = "/toothfairy/visual-system/nft-keepsake-v1.png";
 
 const steps = [
   {
     eyebrow: "01",
-    title: "Capture",
-    body: "Tooth, smile, or tiny note.",
+    title: "Draw",
+    body: "Make the tooth moment theirs.",
     accent: "gold",
     image: "/toothfairy/visual-system/save-moment-v1.png",
     alt: "A tooth, camera, and child drawing arranged as a keepsake activity",
@@ -18,8 +19,8 @@ const steps = [
   },
   {
     eyebrow: "02",
-    title: "Create the Toothlight",
-    body: "Turn the moment into a keepsake.",
+    title: "Light",
+    body: "Turn it into a Toothlight.",
     accent: "coral",
     image: "/toothfairy/visual-system/tanda-guide-v1.png",
     alt: "Tanda guiding a magical Toothlight moment",
@@ -28,8 +29,8 @@ const steps = [
   },
   {
     eyebrow: "03",
-    title: "Save for later",
-    body: "Parents keep control until the child is ready.",
+    title: "Save",
+    body: "Keep the wallet parent-controlled.",
     accent: "teal",
     image: "/toothfairy/visual-system/watch-grow-v1.png",
     alt: "A gentle savings chart growing from tooth tokens",
@@ -50,8 +51,8 @@ const storyCards = [
   },
   {
     chapter: "Chapter 2",
-    title: "Tanda Fae and the First Tooth Fee",
-    body: "A father by the sea turns the first tooth fee into a promise to notice what a child outgrows.",
+    title: "Tanda Fae and the Tooth Fee",
+    body: "A father by the sea turns a small tooth into proof of growing up.",
     image: "/story-assets/viking-origin/v2/s2-frame-01-cover-v3.png",
     alt: "Young Tanda holding a glowing tooth beside her father in a Norse shipyard",
     href: "/toothfairy/story/viking-origin",
@@ -59,7 +60,7 @@ const storyCards = [
   },
   {
     chapter: "Chapter 3",
-    title: "The Toothlight Treaty",
+    title: "Ratoncito Perez and the Toothlight Treaty",
     body: "A child with two true family traditions asks Perez and Tanda not to make her choose.",
     image: "/story-assets/ratoncito-perez/v2/rp3-frame-01-two-doors.png",
     alt: "Tanda and Ratoncito Perez meeting on a Madrid rooftop under moonlight",
@@ -88,19 +89,26 @@ function ToothMark({ className = "" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 64 76" fill="none" aria-hidden>
       <path
-        d="M32 5.5c-10.2 0-18.6 7.7-19.5 18.1-.6 6.5 1.3 12.4 3.2 18.5 1.4 4.6 2 10.9 3.2 17.1.9 4.5 3.2 8.8 6.8 8.8 3.3 0 4.4-4.8 5.1-11.1.3-2.9.8-5.4 1.2-6.7.4 1.3.9 3.8 1.2 6.7.8 6.3 1.9 11.1 5.2 11.1 3.6 0 5.9-4.3 6.8-8.8 1.2-6.2 1.8-12.5 3.2-17.1 1.9-6.1 3.8-12 3.2-18.5C50.6 13.2 42.2 5.5 32 5.5Z"
+        d="M32.4 6.8c-9.2 0-16.8 7-17.5 16.4-.4 5.9 1.2 11.1 3.1 16.5 1.5 4.1 2.1 9.8 2.8 15.5.6 5.2 2.5 10 6 10 3 0 4.1-4.2 4.8-10 .3-2.8.8-5.2 1.1-6.3.4 1.1.9 3.5 1.2 6.3.7 5.8 1.8 10 4.8 10 3.6 0 5.4-4.8 6-10 .7-5.7 1.3-11.4 2.8-15.5 1.9-5.4 3.5-10.6 3.1-16.5-.7-9.4-8.7-16.4-18.2-16.4Z"
         fill="url(#liveHeroToothFill)"
-        stroke="#c7963e"
-        strokeWidth="2.3"
+        stroke="url(#liveHeroToothStroke)"
+        strokeWidth="2.1"
         strokeLinejoin="round"
       />
-      <path d="M20 26c6 3.1 17.2 3.7 24 0" stroke="#fff3bd" strokeWidth="2" strokeLinecap="round" />
+      <path d="M20.6 24.7c5.5 3 16.6 3.5 23.7.1" stroke="#fff9d7" strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M23.5 18.8c3.2-3.8 9.1-5.5 14.6-3.9" stroke="#ffffff" strokeWidth="2.3" strokeLinecap="round" opacity=".9" />
+      <path d="M45.3 36.9c-1 3-1.7 6.4-2.1 10.1" stroke="#f3c762" strokeWidth="1.8" strokeLinecap="round" opacity=".72" />
       <defs>
-        <linearGradient id="liveHeroToothFill" x1="18" y1="8" x2="50" y2="70" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#fffefa" />
-          <stop offset="0.42" stopColor="#fff2c6" />
-          <stop offset="0.72" stopColor="#eec25b" />
-          <stop offset="1" stopColor="#b9781b" />
+        <linearGradient id="liveHeroToothFill" x1="18" y1="9" x2="48" y2="67" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#ffffff" />
+          <stop offset="0.46" stopColor="#fff8dd" />
+          <stop offset="0.76" stopColor="#f3c762" />
+          <stop offset="1" stopColor="#c98924" />
+        </linearGradient>
+        <linearGradient id="liveHeroToothStroke" x1="19" y1="8" x2="49" y2="68" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#fff1af" />
+          <stop offset="0.52" stopColor="#d8a43c" />
+          <stop offset="1" stopColor="#9c6419" />
         </linearGradient>
       </defs>
     </svg>
@@ -117,11 +125,11 @@ export default function TandaLiveRitualHero() {
       >
         <div className={styles.copy}>
           <h1>
-            Turn a lost tooth into
-            <span>a Toothlight they can grow into.</span>
+            Now turn a lost tooth{" "}
+            <span>into your child's first digital wallet.</span>
           </h1>
           <p>
-            Save the tooth story, drawing, and family note in one parent-controlled keepsake. The Smile Fund can come later, when the gift path is ready.
+            Start with a Toothlight memory. Parents control the wallet, the timing, and the family link.
           </p>
         </div>
 
@@ -135,8 +143,26 @@ export default function TandaLiveRitualHero() {
               sizes="(min-width: 1024px) 680px, 94vw"
               className={styles.familyImage}
             />
+            <svg
+              className={styles.networkBackdrop}
+              viewBox="0 0 640 640"
+              preserveAspectRatio="none"
+              aria-hidden
+            >
+              <path d="M306 72 C 412 18, 512 62, 616 38" />
+              <path d="M336 534 C 426 438, 478 382, 610 332" />
+              <path d="M520 92 C 456 184, 466 272, 522 376 S 492 524, 376 604" />
+              <circle cx="306" cy="72" r="4.4" />
+              <circle cx="430" cy="40" r="3.8" />
+              <circle cx="520" cy="74" r="5" />
+              <circle cx="616" cy="38" r="5.2" />
+              <circle cx="336" cy="534" r="4.2" />
+              <circle cx="466" cy="408" r="5.4" />
+              <circle cx="610" cy="332" r="4.5" />
+              <circle cx="522" cy="376" r="3.8" />
+              <circle cx="376" cy="604" r="4.4" />
+            </svg>
             <span className={styles.photoWash} aria-hidden />
-            <span className={styles.emptyPinchPatch} aria-hidden />
             <span className={styles.sourceTooth} aria-hidden>
               <ToothMark />
             </span>
@@ -149,7 +175,15 @@ export default function TandaLiveRitualHero() {
 
           <article className={styles.memoryCard}>
             <div className={styles.memoryArt}>
-              <img src={keepsakePreview} alt="" draggable={false} />
+              <img
+                src={keepsakePreview}
+                alt=""
+                draggable={false}
+                onError={(event) => {
+                  event.currentTarget.onerror = null;
+                  event.currentTarget.src = keepsakePreviewFallback;
+                }}
+              />
             </div>
             <p>Toothlight</p>
             <strong>#FDSR</strong>
@@ -160,7 +194,7 @@ export default function TandaLiveRitualHero() {
             <div>
               <p>Little Smile Fund</p>
               <strong>$360</strong>
-              <em>Example family gift preview</em>
+              <em>6 family gifts saved</em>
             </div>
             <div className={styles.fundBars} aria-hidden>
               <span />
@@ -233,11 +267,10 @@ export default function TandaLiveRitualHero() {
         <div className={styles.howIntro}>
           <p>How it works</p>
           <h2>
-            A tiny ritual.
-            <span className={styles.howTitleLine}>Then a memory parents control.</span>
+            Draw it. Light it. Save it.
           </h2>
           <span>
-            Capture it. Add the magic. Save it until they are ready.
+            A lost tooth becomes a Toothlight memory, then a first wallet parents control until the child is ready.
           </span>
         </div>
 
@@ -265,8 +298,11 @@ export default function TandaLiveRitualHero() {
 
       <section className={styles.storyWorld} aria-label="Tooth Fairy Network stories">
         <div className={styles.storyIntro}>
-          <p>The first shelf</p>
-          <h2>Start with Tanda, then meet the keepers around the world.</h2>
+          <p>Stories from around the world</p>
+          <h2>Tanda is building the Tooth Fairy Network.</h2>
+          <span>
+            Start with Tanda, then follow the old promises behind lost-tooth traditions from every corner of the world.
+          </span>
         </div>
 
         <div className={styles.storyStrip}>
@@ -289,7 +325,7 @@ export default function TandaLiveRitualHero() {
         </div>
 
         <a href="/toothfairy/stories" className={styles.storyAction}>
-          Read the first shelf
+          Explore global tooth traditions
         </a>
       </section>
     </main>
