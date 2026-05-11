@@ -30,6 +30,13 @@ test('Magic Studio keeps a visible progress status during long multi-style runs'
   assert.match(previewPage, /enhanceState\.kind === ['"]loading['"]/);
 });
 
+test('Magic Studio loading state gives families an animated Tanda moment', () => {
+  assert.match(previewPage, /Tanda is adding magic/);
+  assert.match(previewPage, /aria-label=["']Tanda is adding magic["']/);
+  assert.match(previewPage, /tfnMagicDust/);
+  assert.match(previewPage, /tfnMagicOrbit/);
+});
+
 test('main app treats Magic Studio artwork as already-created art', () => {
   assert.match(appPage, /const FINAL_DRAWING_KEY = ['"]toothfairy-final-drawing['"]/);
   assert.match(appPage, /function hasSelectedArtworkHandoff/);

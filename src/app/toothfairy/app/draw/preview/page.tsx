@@ -80,6 +80,146 @@ function startGoogleSignIn() {
   window.location.href = `/api/auth/google?next=${encodeURIComponent(signInNextPath())}`;
 }
 
+function MagicLoadingStatus({
+  label,
+  index,
+  total,
+}: {
+  label: string;
+  index: number;
+  total: number;
+}) {
+  const dust = [
+    { left: '20%', top: '18%', delay: '0ms' },
+    { left: '76%', top: '16%', delay: '180ms' },
+    { left: '82%', top: '58%', delay: '340ms' },
+    { left: '28%', top: '74%', delay: '520ms' },
+    { left: '50%', top: '28%', delay: '700ms' },
+  ];
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="text-center mb-6 rounded-2xl px-5 py-5 relative overflow-hidden"
+      style={{
+        background: c.cream,
+        border: `1px solid ${c.goldTint}`,
+        boxShadow: '0 12px 34px oklch(30% 0.035 65 / 0.08)',
+      }}
+    >
+      <div
+        aria-label="Tanda is adding magic"
+        role="img"
+        className="mx-auto mb-4 relative"
+        style={{ width: 82, height: 82 }}
+      >
+        <div
+          aria-hidden
+          className="absolute inset-0 rounded-full tfn-magic-animated"
+          style={{
+            background: c.goldSoft,
+            border: `1px solid ${c.goldTint}`,
+            animation: 'tfnMagicOrbit 2.8s linear infinite',
+          }}
+        />
+        <div
+          aria-hidden
+          className="absolute rounded-full flex items-center justify-center"
+          style={{
+            inset: 12,
+            background: c.creamDeep,
+            color: c.gold,
+            boxShadow: 'inset 0 0 0 1px oklch(72% 0.145 75 / 0.28)',
+            fontFamily: 'var(--font-display)',
+            fontSize: 30,
+            lineHeight: 1,
+          }}
+        >
+          T
+        </div>
+        {dust.map((sparkle) => (
+          <span
+            key={`${sparkle.left}-${sparkle.top}`}
+            aria-hidden
+            className="absolute rounded-full tfn-magic-animated"
+            style={{
+              left: sparkle.left,
+              top: sparkle.top,
+              width: 7,
+              height: 7,
+              background: c.gold,
+              boxShadow: '0 0 14px oklch(72% 0.145 75 / 0.55)',
+              animation: `tfnMagicDust 1.7s ease-in-out ${sparkle.delay} infinite`,
+            }}
+          />
+        ))}
+      </div>
+
+      <p
+        style={{
+          fontFamily: 'var(--font-display)',
+          color: c.brown,
+          fontSize: '1.12rem',
+          marginBottom: 4,
+        }}
+      >
+        Tanda is adding magic
+      </p>
+      <p
+        style={{
+          fontFamily: 'var(--font-body)',
+          color: c.brown,
+          fontSize: 13,
+          fontWeight: 700,
+          marginBottom: 4,
+        }}
+      >
+        Magic is still working
+      </p>
+      <p
+        style={{
+          fontFamily: 'var(--font-body)',
+          color: c.brownMuted,
+          fontSize: 13,
+        }}
+      >
+        {label} - {index} of {total}
+      </p>
+      <style jsx global>{`
+        @keyframes tfnMagicOrbit {
+          from {
+            transform: rotate(0deg) scale(1);
+          }
+          50% {
+            transform: rotate(180deg) scale(1.05);
+          }
+          to {
+            transform: rotate(360deg) scale(1);
+          }
+        }
+        @keyframes tfnMagicDust {
+          0%,
+          100% {
+            opacity: 0.2;
+            transform: translate3d(0, 8px, 0) scale(0.72);
+          }
+          45% {
+            opacity: 1;
+            transform: translate3d(0, -8px, 0) scale(1.2);
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .tfn-magic-animated {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export default function DrawPreviewPage() {
   const router = useRouter();
   const [drawing, setDrawing] = useState<string | null>(null);
@@ -399,6 +539,33 @@ export default function DrawPreviewPage() {
               background: c.cream,
             }}
           />
+          {enhanceState.kind === 'loading' && (
+            <div
+              aria-hidden
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  'radial-gradient(circle at 30% 20%, oklch(72% 0.145 75 / 0.28), transparent 30%), radial-gradient(circle at 78% 70%, oklch(57% 0.11 145 / 0.16), transparent 34%)',
+                mixBlendMode: 'multiply',
+              }}
+            >
+              {[18, 34, 52, 70, 84].map((left, index) => (
+                <span
+                  key={left}
+                  className="absolute rounded-full tfn-magic-animated"
+                  style={{
+                    left: `${left}%`,
+                    top: `${index % 2 === 0 ? 24 + index * 9 : 56 - index * 5}%`,
+                    width: 8,
+                    height: 8,
+                    background: c.gold,
+                    boxShadow: '0 0 18px oklch(72% 0.145 75 / 0.6)',
+                    animation: `tfnMagicDust 1.9s ease-in-out ${index * 120}ms infinite`,
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-between gap-3 mb-4">
@@ -507,43 +674,11 @@ export default function DrawPreviewPage() {
         </section>
 
         {enhanceState.kind === 'loading' && (
-          <div
-            role="status"
-            aria-live="polite"
-            className="text-center mb-6 rounded-2xl px-5 py-4"
-            style={{ background: c.cream, border: `1px solid ${c.goldTint}` }}
-          >
-            <p
-              style={{
-                fontFamily: 'var(--font-display)',
-                color: c.brown,
-                fontSize: '1.08rem',
-                marginBottom: 4,
-              }}
-            >
-              Transforming {loadingStyle?.label ?? 'the drawing'}
-            </p>
-            <p
-              style={{
-                fontFamily: 'var(--font-body)',
-                color: c.brown,
-                fontSize: 13,
-                fontWeight: 700,
-                marginBottom: 4,
-              }}
-            >
-              Magic is still working
-            </p>
-            <p
-              style={{
-                fontFamily: 'var(--font-body)',
-                color: c.brownMuted,
-                fontSize: 13,
-              }}
-            >
-              {enhanceState.index} of {enhanceState.total}
-            </p>
-          </div>
+          <MagicLoadingStatus
+            label={`Transforming ${loadingStyle?.label ?? 'the drawing'}`}
+            index={enhanceState.index}
+            total={enhanceState.total}
+          />
         )}
 
         {enhanceState.kind === 'error' && (
