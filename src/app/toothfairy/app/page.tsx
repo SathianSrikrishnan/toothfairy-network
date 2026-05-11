@@ -16,20 +16,27 @@ import { PublicKey } from "@solana/web3.js"
 import { WalletButton } from "@/components/toothfairy/app/wallet-button"
 import Link from "next/link"
 import { createBrowserSupabase } from "@/lib/supabase-auth"
-import DrawingCanvas, { type DrawingCanvasRef } from "@/components/toothfairy/app/drawing-canvas"
 import TellStep from "@/components/toothfairy/app/tell-step"
 import { useRouter } from "next/navigation"
 
 // Parent-facing ritual flow.
 // Every step should feel like preserving a keepsake first and touching crypto second.
 //
-// Flow (single path):
-//   setup → create → tell → preview → deposit → minting → done
+// Flow (single path after the V2 draw/Magic Studio handoff):
+//   setup → tell → preview → deposit → minting → done
 // The deposit step is always skippable — mint creates the keepsake whether
 // or not SOL is added.
 
-type Step = "setup" | "create" | "tell" | "preview" | "deposit" | "minting" | "done"
+type Step = "setup" | "tell" | "preview" | "deposit" | "minting" | "done"
 type LockChoice = "now" | "ageTen" | "custom"
+type StoredFlowState = {
+  childName?: unknown
+  childDob?: unknown
+  childPhoto?: unknown
+  previewImage?: unknown
+  fromMagicStudio?: unknown
+  step?: unknown
+}
 
 // Flow-level localStorage keys — cleared on successful mint.
 const TELL_TEXT_KEY = "tfn-tell-text"
@@ -48,6 +55,27 @@ const HAS_SUPABASE_CONFIG = Boolean(
   process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 )
+
+function isStorageString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0
+}
+
+function parseStoredFlowState(raw: string | null): StoredFlowState | null {
+  if (!raw) return null
+  try {
+    const parsed = JSON.parse(raw) as StoredFlowState
+    return parsed && typeof parsed === "object" ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+function hasSelectedArtworkHandoff(
+  state: StoredFlowState | null,
+  finalDrawing: string | null,
+) {
+  return isStorageString(state?.previewImage) || isStorageString(finalDrawing)
+}
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false)
@@ -155,64 +183,6 @@ function PaperCard({
     >
       {children}
     </div>
-  )
-}
-
-function ProductPromiseCard() {
-  const items = [
-    {
-      title: "Save the memory",
-      body: "Photo, drawing, and story in one place.",
-    },
-    {
-      title: "Share one link",
-      body: "Family can see the moment and add a gift.",
-    },
-    {
-      title: "Start the Smile Fund",
-      body: "Small gifts can grow beside the memory.",
-    },
-  ]
-
-  return (
-    <PaperCard className="grid gap-3 md:grid-cols-3" padded={false}>
-      {items.map((item, index) => (
-        <div
-          key={item.title}
-          className="p-4 md:p-5"
-          style={{
-            borderLeft: index > 0 ? "1px solid var(--tfn-border)" : "none",
-          }}
-        >
-          <p
-            className="mb-2 text-[10px] font-bold uppercase"
-            style={{
-              color: "var(--tfn-gold)",
-              letterSpacing: "0.14em",
-              fontFamily: "var(--font-body), 'Alegreya Sans', system-ui, sans-serif",
-            }}
-          >
-            0{index + 1}
-          </p>
-          <h3
-            className="text-lg leading-tight"
-            style={{
-              color: "var(--tfn-ink)",
-              fontFamily: "var(--font-display), 'Alegreya', Georgia, serif",
-              fontWeight: 700,
-            }}
-          >
-            {item.title}
-          </h3>
-          <p
-            className="mt-2 text-sm leading-relaxed"
-            style={{ color: "var(--tfn-ink-soft)" }}
-          >
-            {item.body}
-          </p>
-        </div>
-      ))}
-    </PaperCard>
   )
 }
 
@@ -338,9 +308,6 @@ export default function ToothFairyApp() {
   const [tellText, setTellText] = useState<string>("")
   const [childName, setChildName] = useState("")
   const [childDob, setChildDob] = useState("")
-  const [photo, setPhoto] = useState<string | null>(null)
-  const [note, setNote] = useState("")
-  const [showNote, setShowNote] = useState(false)
   const [toothName, setToothName] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [mintProgress, setMintProgress] = useState("")
@@ -419,10 +386,6 @@ export default function ToothFairyApp() {
   const [awaitingCardDeposit, setAwaitingCardDeposit] = useState(false)
   const [showGiftPanel, setShowGiftPanel] = useState(false)
 
-  // Canvas
-  const drawingCanvasRef = useRef<DrawingCanvasRef>(null)
-  const fileRef = useRef<HTMLInputElement>(null)
-
   // Anchor provider
   const anchorProvider = useMemo(() => {
     if (!publicKey || !signTransaction || !signAllTransactions) return null
@@ -448,42 +411,33 @@ export default function ToothFairyApp() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem(FLOW_STORAGE_KEY)
-      const state = saved ? JSON.parse(saved) : null
-      if (state?.childName) setChildName(state.childName)
-      if (state?.childDob) setChildDob(state.childDob)
-      if (state?.childPhoto) setChildPhoto(state.childPhoto)
-      if (state?.fromMagicStudio) setMagicArtworkReady(true)
+      const state = parseStoredFlowState(saved)
+      const finalDrawing = localStorage.getItem(FINAL_DRAWING_KEY)
+      const storedChildName = state?.childName
+      const storedChildDob = state?.childDob
+      const storedChildPhoto = state?.childPhoto
+      const storedPreviewImage = state?.previewImage
 
-      let restoredPreviewImage =
-        typeof state?.previewImage === "string" ? state.previewImage : null
+      if (isStorageString(storedChildName)) setChildName(storedChildName)
+      if (isStorageString(storedChildDob)) setChildDob(storedChildDob)
+      if (isStorageString(storedChildPhoto)) setChildPhoto(storedChildPhoto)
 
-      if (!restoredPreviewImage) {
-        const finalDrawing = localStorage.getItem(FINAL_DRAWING_KEY)
-        const enhanced = localStorage.getItem(LATEST_ENHANCED_KEY)
-        const drawing = localStorage.getItem(LATEST_DRAWING_KEY)
-        restoredPreviewImage = finalDrawing || enhanced || drawing
-        if (finalDrawing) setMagicArtworkReady(true)
-      }
+      const restoredPreviewImage = isStorageString(storedPreviewImage)
+        ? storedPreviewImage
+        : finalDrawing
+      setMagicArtworkReady(hasSelectedArtworkHandoff(state, finalDrawing))
 
       if (restoredPreviewImage) setPreviewImage(restoredPreviewImage)
-      if (state?.photo) setPhoto(state.photo)
       if (state?.step === "preview" || state?.step === "deposit") setStep("preview")
     } catch { /* ignore corrupt localStorage */ }
   }, [])
 
   useEffect(() => {
     if (typeof window === "undefined") return
-    const params = new URLSearchParams(window.location.search)
-    if (params.get("legacy") === "1") return
+    const storedFlowState = parseStoredFlowState(localStorage.getItem(FLOW_STORAGE_KEY))
+    const finalDrawing = localStorage.getItem(FINAL_DRAWING_KEY)
 
-    const hasMagicOrMintHandoff = Boolean(
-      localStorage.getItem(FLOW_STORAGE_KEY) ||
-        localStorage.getItem(FINAL_DRAWING_KEY) ||
-        localStorage.getItem(LATEST_ENHANCED_KEY) ||
-        localStorage.getItem(LATEST_DRAWING_KEY)
-    )
-
-    if (!hasMagicOrMintHandoff) {
+    if (!hasSelectedArtworkHandoff(storedFlowState, finalDrawing)) {
       router.replace("/toothfairy/app/draw?from=app")
     }
   }, [router])
@@ -540,29 +494,12 @@ export default function ToothFairyApp() {
   }, [saveFlowState])
 
   // ── Photo handlers ──
-  const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => { setPhoto(reader.result as string) }
-    reader.readAsDataURL(file)
-  }
-
   const handleChildPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
     reader.onload = () => { setChildPhoto(reader.result as string) }
     reader.readAsDataURL(file)
-  }
-
-  const goToPreview = () => {
-    const dataUrl = drawingCanvasRef.current?.toDataURL()
-    if (dataUrl) {
-      setPreviewImage(dataUrl)
-      try { localStorage.setItem(LATEST_DRAWING_KEY, dataUrl) } catch {}
-    }
-    setStep("tell")
   }
 
   const handleTellContinue = useCallback((text: string) => {
@@ -649,7 +586,7 @@ export default function ToothFairyApp() {
           imageBase64,
           imageUrl,
           imageMimeType: "image/jpeg",
-          note: note || undefined,
+          note: toothStoryForMint || undefined,
           birthday: childDob || undefined,
           smilePhotoBase64,
           toothStory: toothStoryForMint,
@@ -774,7 +711,7 @@ export default function ToothFairyApp() {
 
   const mintAnother = () => {
     clearFlowState()
-    setStep("setup"); setPhoto(null); setPreviewImage(null); setMintSignature("")
+    setStep("setup"); setPreviewImage(null); setMintSignature("")
     setMagicArtworkReady(false)
     setError(null); setMintProgress(""); setDeposits([]); setEscrowInfo(null)
     setDepositSuccess(null)
@@ -794,18 +731,16 @@ export default function ToothFairyApp() {
   const childPhotoPicker = (
     <div className="flex flex-col items-center gap-3">
       <input ref={childPhotoRef} type="file" accept="image/*" onChange={handleChildPhoto} className="hidden" />
-      {magicArtworkReady && (
-        <p
-          className="text-[10px] font-semibold uppercase"
-          style={{
-            color: "var(--tfn-ink-muted)",
-            letterSpacing: "0.18em",
-            fontFamily: "var(--font-body), 'Alegreya Sans', system-ui, sans-serif",
-          }}
-        >
-          Optional child photo
-        </p>
-      )}
+      <p
+        className="text-[10px] font-semibold uppercase"
+        style={{
+          color: "var(--tfn-ink-muted)",
+          letterSpacing: "0.18em",
+          fontFamily: "var(--font-body), 'Alegreya Sans', system-ui, sans-serif",
+        }}
+      >
+        Optional child photo
+      </p>
       {childPhoto ? (
         <div className="relative">
           <div
@@ -844,12 +779,12 @@ export default function ToothFairyApp() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
           </svg>
           <span className="text-[10px] uppercase" style={{ letterSpacing: "0.2em" }}>
-            {magicArtworkReady ? "Add child photo" : "Add photo"}
+            Add child photo
           </span>
         </button>
       )}
       <p className="text-xs italic" style={{ color: "var(--tfn-ink-muted)", fontFamily: "var(--font-display), 'Alegreya', serif" }}>
-        {magicArtworkReady ? "This is optional and can be added later." : "Appears on the memory page."}
+        This is optional and can be added later.
       </p>
     </div>
   )
@@ -873,7 +808,7 @@ export default function ToothFairyApp() {
             fontFamily: "var(--font-display), 'Alegreya', Georgia, serif",
           }}
         >
-          Magic artwork selected
+          Artwork selected
         </p>
         <p
           className="mt-1 text-xs leading-relaxed"
@@ -985,20 +920,14 @@ export default function ToothFairyApp() {
           <div className="space-y-12">
             <div className="space-y-5">
               <div className="text-center">
-                <Eyebrow>{magicArtworkReady ? "Keepsake details" : "Begin"}</Eyebrow>
+                <Eyebrow>Keepsake details</Eyebrow>
               </div>
               <StepTitle
-                title={magicArtworkReady ? "Who is this keepsake for?" : "Save the tooth moment."}
-                subtitle={
-                  magicArtworkReady
-                    ? "The Magic artwork is ready. Add the child details before saving it."
-                    : "A photo, a drawing, and a few words become one memory your family can keep."
-                }
+                title="Who is this keepsake for?"
+                subtitle="The artwork is ready. Add the child details before saving it."
               />
             </div>
 
-            {!magicArtworkReady && <ProductPromiseCard />}
-            {!magicArtworkReady && childPhotoPicker}
             {magicArtworkSummary}
 
             {/* Details card */}
@@ -1041,13 +970,16 @@ export default function ToothFairyApp() {
               </InputRow>
             </PaperCard>
 
-            {magicArtworkReady && childPhotoPicker}
+            {childPhotoPicker}
 
             <GoldCTA
-              onClick={() => magicArtworkReady ? setStep("tell") : setStep("create")}
+              onClick={() => {
+                if (magicArtworkReady) setStep("tell")
+                else router.push("/toothfairy/app/draw?from=app-details")
+              }}
               disabled={!childName.trim() || !childDob}
             >
-              {magicArtworkReady ? "Continue with this keepsake" : "Continue to the memory"}
+              {magicArtworkReady ? "Continue with this keepsake" : "Start with photo or drawing"}
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
               </svg>
@@ -1055,153 +987,7 @@ export default function ToothFairyApp() {
           </div>
         )}
 
-        {/* ── STEP 2: Create ── */}
-        {step === "create" && (
-          <div className="space-y-10">
-            <div className="space-y-5">
-              <div className="text-center">
-                <Eyebrow>The portrait</Eyebrow>
-              </div>
-              <StepTitle
-                title="Make it theirs."
-                subtitle="Add the tooth photo, then mark it up with color."
-              />
-            </div>
-
-            {/* Photo upload */}
-            {!photo && (
-              <PaperCard padded={false}>
-                <button
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  className="w-full py-10 flex flex-col items-center justify-center transition-opacity hover:opacity-85"
-                >
-                  <svg className="w-8 h-8 mb-3" style={{ color: "var(--tfn-gold)" }} fill="none" viewBox="0 0 24 24" strokeWidth={1.4} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
-                  </svg>
-                  <p
-                    className="text-sm"
-                    style={{ color: "var(--tfn-ink-soft)", fontFamily: "var(--font-body), 'Alegreya Sans', serif" }}
-                  >
-                    Add the tooth photo
-                  </p>
-                  <p
-                    className="text-xs mt-1 italic"
-                    style={{ color: "var(--tfn-ink-muted)", fontFamily: "var(--font-display), 'Alegreya', serif" }}
-                  >
-                    You can also draw from memory.
-                  </p>
-                </button>
-              </PaperCard>
-            )}
-
-            {photo && (
-              <div className="flex justify-center">
-                <div className="relative">
-                  <img
-                    src={photo}
-                    alt="Preview"
-                    className="w-24 h-24 rounded-lg object-cover"
-                    style={{ border: "1px solid var(--tfn-border)" }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setPhoto(null)}
-                    aria-label="Remove"
-                    className="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                    style={{ background: "var(--tfn-surface-alt)", border: "1px solid var(--tfn-border)", color: "var(--tfn-ink-soft)" }}
-                  >
-                    ×
-                  </button>
-                </div>
-              </div>
-            )}
-            <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} className="hidden" />
-
-            {/* Drawing canvas */}
-            <DrawingCanvas ref={drawingCanvasRef} photo={photo} />
-
-            {photo && (
-              <p className="text-xs text-center italic" style={{ color: "var(--tfn-ink-muted)", fontFamily: "var(--font-display), 'Alegreya', serif" }}>
-                Draw over the photo, or continue with it as-is.
-              </p>
-            )}
-
-            {/* Optional note */}
-            {showNote || note ? (
-              <PaperCard className="space-y-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <InputRow label={`A note for ${childName || "later"} (optional)`}>
-                      <textarea
-                        value={note}
-                        onChange={(e) => setNote(e.target.value.slice(0, 500))}
-                        placeholder={childName ? `A sentence ${childName} can read when they're older...` : "A sentence they can read when they're older..."}
-                        maxLength={500}
-                        spellCheck={false}
-                        className="w-full rounded-lg px-4 py-3 text-base outline-none resize-none"
-                        style={{
-                          background: "var(--tfn-surface)",
-                          border: "1px solid var(--tfn-border)",
-                          color: "var(--tfn-ink)",
-                          fontFamily: "var(--font-body), 'Alegreya Sans', system-ui, sans-serif",
-                          minHeight: "96px",
-                        }}
-                        rows={3}
-                      />
-                    </InputRow>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setNote("")
-                      setShowNote(false)
-                    }}
-                    className="text-xs underline transition-opacity hover:opacity-80"
-                    style={{ color: "var(--tfn-ink-muted)" }}
-                  >
-                    Skip
-                  </button>
-                </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-[11px]" style={{ color: "var(--tfn-ink-muted)" }}>
-                    Optional. The memory works without it.
-                  </p>
-                  <p className="text-[11px] font-mono" style={{ color: "var(--tfn-ink-muted)" }}>
-                    {note.length}/500
-                  </p>
-                </div>
-              </PaperCard>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowNote(true)}
-                className="w-full rounded-full py-3 text-sm font-medium transition-opacity hover:opacity-85"
-                style={{
-                  border: "1px solid var(--tfn-border)",
-                  color: "var(--tfn-ink-soft)",
-                  background: "var(--tfn-surface-alt)",
-                  fontFamily: "var(--font-body), 'Alegreya Sans', system-ui, sans-serif",
-                }}
-              >
-                Add a note (optional)
-              </button>
-            )}
-
-            <div className="space-y-3">
-              <GoldCTA onClick={goToPreview}>
-                See the family page
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                </svg>
-              </GoldCTA>
-              <GhostButton onClick={() => setStep("setup")}>Back</GhostButton>
-            </div>
-          </div>
-        )}
-
-        {/* ── STEP 2.5: Tell ── */}
+        {/* STEP 2: Tell */}
         {step === "tell" && (
           <TellStep
             value={tellText}
@@ -1255,7 +1041,7 @@ export default function ToothFairyApp() {
                     >
                       {toothDisplayName}
                     </p>
-                    {note && (
+                    {tellText && (
                       <p
                         className="text-xs italic mt-1 line-clamp-2"
                         style={{
@@ -1264,7 +1050,7 @@ export default function ToothFairyApp() {
                           textShadow: "0 1px 8px rgba(0,0,0,0.6)",
                         }}
                       >
-                        &ldquo;{note}&rdquo;
+                        &ldquo;{tellText}&rdquo;
                       </p>
                     )}
                   </div>
@@ -1346,11 +1132,14 @@ export default function ToothFairyApp() {
 
             <button
               type="button"
-              onClick={() => magicArtworkReady ? setStep("setup") : setStep("create")}
+              onClick={() => {
+                if (magicArtworkReady) setStep("setup")
+                else router.push("/toothfairy/app/draw?from=app-preview")
+              }}
               className="w-full text-xs text-center py-2 underline transition-opacity hover:opacity-80"
               style={{ color: "var(--tfn-ink-muted)" }}
             >
-              {magicArtworkReady ? "Back to details" : "Back to drawing"}
+              {magicArtworkReady ? "Back to details" : "Back to photo and drawing"}
             </button>
           </div>
         )}

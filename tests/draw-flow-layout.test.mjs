@@ -6,6 +6,7 @@ const headerSource = readFileSync('src/components/toothfairy/nav/tfn-header.tsx'
 const footerSource = readFileSync('src/components/toothfairy/nav/tfn-footer.tsx', 'utf8');
 const drawLayoutSource = readFileSync('src/app/toothfairy/app/draw/layout.tsx', 'utf8');
 const canvasSource = readFileSync('src/components/toothfairy/app/drawing-canvas-v2.tsx', 'utf8');
+const drawPageSource = readFileSync('src/app/toothfairy/app/draw/page.tsx', 'utf8');
 
 test('draw flow hides the marketing header and footer chrome', () => {
   assert.match(drawLayoutSource, /\.tfn-header,\s*\.tfn-footer/);
@@ -99,7 +100,6 @@ test('draw header uses photo and imagination copy without the old eyebrow', () =
 });
 
 test('draw page exposes photo capture and passes it into the V2 canvas', () => {
-  const drawPageSource = readFileSync('src/app/toothfairy/app/draw/page.tsx', 'utf8');
   assert.match(drawPageSource, /type=['"]file['"]/);
   assert.match(drawPageSource, /accept=['"]image\/\*['"]/);
   assert.match(drawPageSource, /capture=['"]environment['"]/);
@@ -110,4 +110,11 @@ test('draw page exposes photo capture and passes it into the V2 canvas', () => {
   assert.match(drawPageSource, /photo-action-button/);
   assert.match(drawPageSource, /initialBackground=\{photo\}/);
   assert.match(drawPageSource, /pointerEvents:\s*['"]none['"]/);
+});
+
+test('draw back button always exits directly to the Tooth Fairy home page', () => {
+  assert.match(drawPageSource, /router\.replace\(['"]\/toothfairy['"]\)/);
+  assert.doesNotMatch(drawPageSource, /getDrawExitPath/);
+  assert.doesNotMatch(drawPageSource, /useSearchParams/);
+  assert.doesNotMatch(drawPageSource, /router\.push\(['"]\/toothfairy\/app['"]\)/);
 });

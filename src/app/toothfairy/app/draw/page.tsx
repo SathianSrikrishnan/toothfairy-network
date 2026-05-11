@@ -114,7 +114,7 @@ export default function DrawPage() {
   };
 
   const handleBack = () => {
-    router.push('/toothfairy/app');
+    router.replace('/toothfairy');
   };
 
   return (
