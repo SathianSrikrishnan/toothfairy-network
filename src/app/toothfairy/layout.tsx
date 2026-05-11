@@ -4,6 +4,10 @@ import { ThemeTransition } from '@/components/toothfairy/nav/theme-transition'
 import { TFNHeader } from '@/components/toothfairy/nav/tfn-header'
 import { TFNFooter } from '@/components/toothfairy/nav/tfn-footer'
 
+const siteDescription =
+  "Turn a child's lost tooth into a Toothlight memory, bedtime story, and parent-controlled Smile Fund preview."
+const siteImage = '/toothfairy/opengraph-image'
+
 // TFN routes use the local fallback font variables from globals.css.
 export const viewport: Viewport = {
   width: 'device-width',
@@ -14,8 +18,9 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://toothfairy.network'),
   title: 'Tooth Fairy Network',
-  description: 'Turn a child\'s lost tooth into a Toothlight memory, bedtime story, and parent-controlled Smile Fund preview.',
+  description: siteDescription,
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -24,7 +29,24 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Tooth Fairy Network',
-    description: 'Turn a child\'s lost tooth into a Toothlight memory, bedtime story, and parent-controlled Smile Fund preview.',
+    description: siteDescription,
+    url: '/',
+    siteName: 'Tooth Fairy Network',
+    type: 'website',
+    images: [
+      {
+        url: siteImage,
+        width: 1200,
+        height: 630,
+        alt: 'The Tooth Fairy Network',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Tooth Fairy Network',
+    description: siteDescription,
+    images: [siteImage],
   },
 }
 

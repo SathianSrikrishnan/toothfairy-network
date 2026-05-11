@@ -493,6 +493,9 @@ export default function DrawPreviewPage() {
 
         {enhanceState.kind === 'loading' && (
           <div
+            role="status"
+            aria-live="polite"
+            aria-busy="true"
             className="text-center mb-6 rounded-2xl px-5 py-4"
             style={{ background: c.cream, border: `1px solid ${c.goldTint}` }}
           >
@@ -504,7 +507,7 @@ export default function DrawPreviewPage() {
                 marginBottom: 4,
               }}
             >
-              Transforming {loadingStyle?.label ?? 'the drawing'}
+              Magic is still working on {loadingStyle?.label ?? 'the drawing'}
             </p>
             <p
               style={{

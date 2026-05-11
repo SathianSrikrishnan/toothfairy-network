@@ -99,12 +99,17 @@ export default function DrawResultPage() {
     if (typeof window !== 'undefined' && window.matchMedia) {
       reducedMotion.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     }
+    let savedOriginal: string | null = null;
     try {
-      setOriginal(localStorage.getItem(LATEST_DRAWING_KEY));
+      savedOriginal =
+        localStorage.getItem(LATEST_DRAWING_KEY) ||
+        sessionStorage.getItem(LATEST_DRAWING_KEY) ||
+        localStorage.getItem(FINAL_DRAWING_KEY);
       setResults(readMagicResults());
     } catch {
       // Private browsing
     }
+    setOriginal(savedOriginal);
   }, []);
 
   useEffect(() => {
@@ -162,7 +167,7 @@ export default function DrawResultPage() {
 
   if (!hydrated) return null;
 
-  if (!original || !selected) {
+  if (!selected) {
     return (
       <main
         className="min-h-screen w-full flex items-center justify-center px-5"
@@ -240,20 +245,22 @@ export default function DrawResultPage() {
             aspectRatio: '1 / 1',
           }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={original}
-            alt="Original drawing"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              background: c.cream,
-              zIndex: 1,
-            }}
-          />
+          {original && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={original}
+              alt="Original drawing"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                background: c.cream,
+                zIndex: 1,
+              }}
+            />
+          )}
 
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -320,22 +327,24 @@ export default function DrawResultPage() {
           >
             {selectedStyle.label}
           </p>
-          <button
-            type="button"
-            onPointerDown={() => setShowOriginal(true)}
-            onPointerUp={() => setShowOriginal(false)}
-            onPointerLeave={() => setShowOriginal(false)}
-            className="text-sm underline"
-            style={{
-              fontFamily: 'var(--font-body)',
-              color: c.brownMuted,
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            Hold to see original
-          </button>
+          {original && (
+            <button
+              type="button"
+              onPointerDown={() => setShowOriginal(true)}
+              onPointerUp={() => setShowOriginal(false)}
+              onPointerLeave={() => setShowOriginal(false)}
+              className="text-sm underline"
+              style={{
+                fontFamily: 'var(--font-body)',
+                color: c.brownMuted,
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              Hold to see original
+            </button>
+          )}
         </div>
 
         {results.length > 1 && (

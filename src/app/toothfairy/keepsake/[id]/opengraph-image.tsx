@@ -5,43 +5,13 @@ export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 export const alt = 'Tooth Fairy Keepsake';
 
-type KeepsakeOGData = {
-  childName: string;
-  storyOrigin: string | null;
-  mintDate: Date | null;
-  drawingUrl: string | null;
-};
-
-async function getKeepsakeOGData(id: string): Promise<KeepsakeOGData> {
-  // Phase 1 stub. Plan 01-03 wires this to real chain data.
-  // The id is the milestone PDA string; until then we return neutral placeholder content
-  // that degrades gracefully without exposing the raw id.
-  void id;
-  return {
-    childName: 'A Tooth Fairy Keepsake',
-    storyOrigin: null,
-    mintDate: null,
-    drawingUrl: null,
-  };
-}
-
-function formatDate(date: Date): string {
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-}
-
-export default async function OGImage({ params }: { params: { id: string } }) {
-  const data = await getKeepsakeOGData(params.id);
-
-  const cream = 'oklch(97.5% 0.01 80)';
-  const creamDeep = 'oklch(95% 0.015 75)';
-  const brown = 'oklch(30% 0.035 65)';
-  const brownSoft = 'oklch(42% 0.03 65)';
-  const gold = 'oklch(72% 0.145 75)';
-  const goldTint = 'oklch(72% 0.145 75 / 0.2)';
+export default function OGImage() {
+  const cream = '#FFF8EA';
+  const creamDeep = '#F4E7CF';
+  const brown = '#4B3226';
+  const brownSoft = '#705743';
+  const gold = '#C89A31';
+  const goldTint = '#E7C66B';
 
   return new ImageResponse(
     (
@@ -52,10 +22,10 @@ export default async function OGImage({ params }: { params: { id: string } }) {
           display: 'flex',
           background: `linear-gradient(135deg, ${cream} 0%, ${creamDeep} 100%)`,
           position: 'relative',
-          fontFamily: 'Georgia, serif',
+          fontFamily: 'system-ui, sans-serif',
+          color: brown,
         }}
       >
-        {/* Subtle gold border */}
         <div
           style={{
             position: 'absolute',
@@ -69,12 +39,11 @@ export default async function OGImage({ params }: { params: { id: string } }) {
           }}
         />
 
-        {/* Left 60% — text */}
         <div
           style={{
-            width: '60%',
+            width: '61%',
             height: '100%',
-            padding: '80px 60px 80px 90px',
+            padding: '82px 58px 82px 90px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
@@ -84,10 +53,10 @@ export default async function OGImage({ params }: { params: { id: string } }) {
             style={{
               fontSize: 28,
               color: gold,
-              letterSpacing: '0.18em',
+              letterSpacing: '0.16em',
               textTransform: 'uppercase',
-              marginBottom: 24,
-              fontWeight: 500,
+              marginBottom: 26,
+              fontWeight: 700,
             }}
           >
             Tooth Fairy Network
@@ -95,57 +64,47 @@ export default async function OGImage({ params }: { params: { id: string } }) {
 
           <div
             style={{
-              fontSize: 84,
+              fontSize: 76,
               color: brown,
-              fontWeight: 500,
-              lineHeight: 1.05,
-              letterSpacing: '-0.02em',
+              fontWeight: 700,
+              lineHeight: 1.04,
+              letterSpacing: 0,
+              display: 'flex',
             }}
           >
-            {data.childName}
+            A Toothlight memory is saved.
           </div>
 
           <div
             style={{
-              width: 80,
-              height: 3,
+              width: 92,
+              height: 4,
               background: gold,
-              marginTop: 28,
+              marginTop: 30,
               marginBottom: 28,
+              display: 'flex',
             }}
           />
 
-          {data.storyOrigin && (
-            <div
-              style={{
-                fontSize: 28,
-                color: brownSoft,
-                fontStyle: 'italic',
-                marginBottom: 16,
-              }}
-            >
-              {data.storyOrigin}
-            </div>
-          )}
-
-          {data.mintDate && (
-            <div
-              style={{
-                fontSize: 22,
-                color: brownSoft,
-              }}
-            >
-              Created {formatDate(data.mintDate)}
-            </div>
-          )}
+          <div
+            style={{
+              color: brownSoft,
+              fontSize: 27,
+              lineHeight: 1.35,
+              maxWidth: 560,
+              display: 'flex',
+            }}
+          >
+            A lost tooth, a child&apos;s story, and a family keepsake in one
+            shareable place.
+          </div>
         </div>
 
-        {/* Right 40% — visual */}
         <div
           style={{
-            width: '40%',
+            width: '39%',
             height: '100%',
-            padding: '80px 90px 80px 40px',
+            padding: '82px 86px 82px 28px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -153,33 +112,46 @@ export default async function OGImage({ params }: { params: { id: string } }) {
         >
           <div
             style={{
-              width: 380,
-              height: 380,
-              borderRadius: 32,
-              background: cream,
+              width: 382,
+              height: 382,
+              borderRadius: 28,
+              background: '#FFFCF5',
               border: `1px solid ${goldTint}`,
-              boxShadow: `0 20px 60px oklch(30% 0.035 65 / 0.12)`,
+              boxShadow: '0 20px 60px rgba(75, 50, 38, 0.12)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              flexDirection: 'column',
             }}
           >
-            {/* Gold star/tooth glyph */}
-            <svg
-              width={160}
-              height={160}
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+            <div
+              style={{
+                width: 174,
+                height: 174,
+                borderRadius: 87,
+                background: gold,
+                color: cream,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 52,
+                fontWeight: 800,
+                letterSpacing: '0.04em',
+              }}
             >
-              <path
-                d="M12 2 L14.5 9 L22 9.5 L16 14.5 L18 22 L12 17.5 L6 22 L8 14.5 L2 9.5 L9.5 9 Z"
-                fill={gold}
-                stroke={gold}
-                strokeWidth={0.5}
-                strokeLinejoin="round"
-              />
-            </svg>
+              TFN
+            </div>
+            <div
+              style={{
+                marginTop: 24,
+                color: brownSoft,
+                fontSize: 25,
+                fontWeight: 700,
+                display: 'flex',
+              }}
+            >
+              Toothlight memory
+            </div>
           </div>
         </div>
       </div>
