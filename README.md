@@ -4,6 +4,15 @@ Tooth Fairy Network turns a child's lost tooth into a family keepsake: a short c
 
 This repo contains the public web app used for the Colosseum build sprint. It also still serves a few legacy `sathian.ai` routes, but the main product surface is `toothfairy.network`.
 
+## Colosseum Review Links
+
+- Live product: https://toothfairy.network
+- Final pitch and build walkthrough page: https://toothfairy.network/colosseum-frontier-2026/final/index.html
+- Pitch video: https://toothfairy.network/colosseum-frontier-2026/final/tooth-fairy-network-pitch.mp4
+- Build walkthrough video: https://toothfairy.network/colosseum-frontier-2026/final/tooth-fairy-network-build-walkthrough.mp4
+
+This repository is the cleaned public source/codebase prepared for Colosseum review. The live deployment at `toothfairy.network` originated from the earlier deployment pipeline while this repo was prepared for public reviewer access. The codebase here contains the Tooth Fairy Network product surfaces, Solana minting and escrow paths, story experience, README, architecture notes, setup guidance, and safety notes for review.
+
 ## Product Surfaces
 
 - `toothfairy.network` -> landing page for parents
