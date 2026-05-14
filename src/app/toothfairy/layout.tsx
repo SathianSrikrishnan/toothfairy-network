@@ -3,6 +3,7 @@ import { ThemeProvider } from '@/components/toothfairy/nav/theme-context'
 import { ThemeTransition } from '@/components/toothfairy/nav/theme-transition'
 import { TFNHeader } from '@/components/toothfairy/nav/tfn-header'
 import { TFNFooter } from '@/components/toothfairy/nav/tfn-footer'
+import { TFNSiteReporter } from '@/components/toothfairy/reporting/tfn-site-reporter'
 
 // TFN routes use the local fallback font variables from globals.css.
 const shareTagline = "A child's first digital asset from a lost tooth."
@@ -63,6 +64,7 @@ export default function ToothFairyLayout({
     <div>
       <ThemeProvider defaultMode="parent">
         <ThemeTransition>
+          <TFNSiteReporter />
           <TFNHeader />
           {children}
           <TFNFooter />

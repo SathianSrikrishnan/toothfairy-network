@@ -74,6 +74,16 @@ Current local finding:
 - With safe placeholder values for Supabase, OpenAI, and ElevenLabs, `npm.cmd run build` exits successfully in this Windows workspace.
 - The placeholder build still logs dummy-config warnings from article fetching and bigint native bindings; these are not currently fatal.
 
+## Reporting Setup
+
+To enable first-party Tooth Fairy reporting in Supabase, apply:
+
+```text
+supabase/migrations/20260514_tfn_site_reporting.sql
+```
+
+The site continues to work if the table has not been created yet, but page-view and click events only persist after the migration is applied and `NEXT_PUBLIC_SUPABASE_URL` plus `SUPABASE_SERVICE_ROLE_KEY` are set in the deployment environment.
+
 ## VPS Use Criteria
 
 Use the VPS when the work needs one of these:
