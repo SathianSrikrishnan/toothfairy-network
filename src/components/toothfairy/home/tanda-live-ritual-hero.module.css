@@ -117,6 +117,7 @@
   aspect-ratio: 16 / 10;
   margin-inline: auto;
   overflow: visible;
+  transform: translateZ(0);
 }
 
 .stage::after {
@@ -274,10 +275,12 @@
   border-radius: 8px;
   background: rgba(255, 252, 246, 0.86);
   box-shadow: 0 24px 54px rgba(47, 35, 80, 0.16);
+  -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
   opacity: 1;
   overflow: visible;
   animation: cardAhaGlow var(--loop) ease-in-out infinite;
+  will-change: box-shadow, border-color;
 }
 
 .memoryCard::after,
@@ -457,6 +460,10 @@
   transform-origin: 50% 58%;
   pointer-events: none;
   animation: tandaPath var(--loop) linear infinite;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  will-change: left, top, opacity, transform;
+  -webkit-backface-visibility: hidden;
 }
 
 .pose,
@@ -557,6 +564,9 @@
   filter:
     drop-shadow(0 22px 30px rgba(47, 35, 80, 0.18))
     drop-shadow(0 0 18px rgba(244, 200, 101, 0.18));
+  backface-visibility: hidden;
+  will-change: opacity;
+  -webkit-backface-visibility: hidden;
 }
 
 .entryUp { animation: entryUpPose var(--loop) linear infinite; }
@@ -578,6 +588,7 @@
   border-radius: 999px;
   pointer-events: none;
   opacity: 0;
+  will-change: opacity, transform;
 }
 
 .phoneGlow {
@@ -651,6 +662,7 @@
   opacity: 0;
   transform: rotate(45deg);
   animation: sparkle var(--loop) ease-in-out infinite;
+  will-change: opacity, transform;
 }
 
 .sparkles span:nth-child(1) { left: 25%; top: 20%; animation-delay: 0s; }

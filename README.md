@@ -65,6 +65,7 @@ There is no package-level test script yet. Targeted checks live in `tests/` and 
 - `supabase/` - database migrations
 - `src/remotion/colosseum/` - Colosseum storyboard/video composition code
 - `docs/archive/` - older launch notes, planning docs, and root setup files retained for historical context
+- `docs/operations/` - source-of-truth, deployment, and infrastructure workflow notes
 
 ## Safety Notes
 
@@ -72,4 +73,13 @@ There is no package-level test script yet. Targeted checks live in `tests/` and 
 - Do not run production deploy commands from this repo without an explicit approval.
 - Treat `TFN_MINT_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and provider API keys as server-only secrets.
 - The companion on-chain program lives in the separate `toothfairy-contracts` repo.
+
+## Operating Workflow
+
+- Canonical repository: `SathianSrikrishnan/toothfairy-network`
+- Default public web host: Vercel
+- Backend: Supabase
+- Optional extra compute: VPS/server, only when a task does not fit Vercel cleanly
+
+See `docs/operations/source-of-truth.md` and `docs/operations/deployment-workflow.md`.
 
