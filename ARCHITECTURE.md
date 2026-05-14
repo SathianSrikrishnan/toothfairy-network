@@ -2,6 +2,14 @@
 
 Tooth Fairy Network is a Next.js app that combines a story-led parent experience with Solana-backed keepsakes.
 
+## Source Of Truth
+
+The canonical product repository is `SathianSrikrishnan/toothfairy-network`.
+
+Older or parallel `sathian-ai` working copies may still contain useful recovery work, legacy routes, or Vercel metadata, but they are reference sources unless a change is intentionally ported into this repository.
+
+Use `codex/*` branches for Codex work. Do not deploy from a dirty or conflicted working copy.
+
 ## Request Routing
 
 The app serves multiple public domains from one Vercel project:
@@ -88,4 +96,10 @@ Client-visible values must use `NEXT_PUBLIC_*`. Private keys and provider secret
 - `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `ELEVENLABS_API_KEY`
 
 Use `.env.example` as the public template and `.env.local` for local secrets.
+
+## Infrastructure Roles
+
+- Vercel runs the public Next.js app and should remain the default deploy target.
+- Supabase owns auth, database records, and storage-backed app state.
+- The VPS/server is optional capacity for long-running jobs, workers, private tools, or media processing that does not fit Vercel serverless functions.
 
