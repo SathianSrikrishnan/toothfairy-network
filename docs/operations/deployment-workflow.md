@@ -18,10 +18,11 @@ Idea -> clean branch -> local check -> push to GitHub -> Vercel preview -> appro
 1. Confirm the local path is this repository.
 2. Confirm the branch name.
 3. Confirm there are no unresolved conflicts.
-4. Run the best available local check.
-5. Push the branch.
-6. Create or inspect the Vercel preview.
-7. Record the preview URL in the task notes or pull request.
+4. Run `npm run preview:check`.
+5. Run the best available local build check.
+6. Push the branch.
+7. Create or inspect the Vercel preview.
+8. Record the preview URL in the task notes or pull request.
 
 ## Before Production
 

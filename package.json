@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "preview:check": "node scripts/check-preview-readiness.mjs",
     "start": "next start",
     "lint": "next lint"
   },
