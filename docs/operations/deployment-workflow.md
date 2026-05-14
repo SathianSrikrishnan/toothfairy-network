@@ -36,6 +36,12 @@ Idea -> clean branch -> local check -> push to GitHub -> Vercel preview -> appro
 
 This local copy currently needs Vercel linkage confirmed.
 
+Current access finding:
+
+- The Codex Vercel connector can list no teams in this session.
+- The old `sathian-ai` Vercel project ID returned `403 Forbidden` from this session.
+- Fixing Vercel access/linkage is required before Codex can inspect deploys or create reliable previews from here.
+
 Capture these values after linking:
 
 - Vercel project name:
@@ -64,6 +70,8 @@ Current local finding:
 - Server-only Supabase routes also expect `SUPABASE_SERVICE_ROLE_KEY` when elevated access is used.
 - `/api/voice/conversation` currently instantiates OpenAI at module load, so `OPENAI_API_KEY` is also required during build unless that route is refactored to lazy-load the client.
 - `/api/voice/speak` currently instantiates ElevenLabs at module load, so `ELEVENLABS_API_KEY` is also required during build unless that route is refactored to lazy-load the client.
+- With safe placeholder values for Supabase, OpenAI, and ElevenLabs, `npm.cmd run build` exits successfully in this Windows workspace.
+- The placeholder build still logs dummy-config warnings from article fetching and bigint native bindings; these are not currently fatal.
 
 ## VPS Use Criteria
 

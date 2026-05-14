@@ -5,6 +5,8 @@ import { TFNHeader } from '@/components/toothfairy/nav/tfn-header'
 import { TFNFooter } from '@/components/toothfairy/nav/tfn-footer'
 
 // TFN routes use the local fallback font variables from globals.css.
+const shareTagline = "A child's first digital asset from a lost tooth."
+
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -14,9 +16,16 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://toothfairy.network'),
+  alternates: { canonical: '/' },
+  applicationName: 'Tooth Fairy Network',
   title: 'Tooth Fairy Network',
-  description: 'Turn a child\'s lost tooth into a Toothlight memory, bedtime story, and parent-controlled Smile Fund preview.',
+  description: shareTagline,
   manifest: '/manifest.json',
+  icons: {
+    icon: '/toothfairy/brand/toothfairy-glow-mark-512.png',
+    apple: '/toothfairy/brand/toothfairy-glow-mark-512.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -24,7 +33,24 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Tooth Fairy Network',
-    description: 'Turn a child\'s lost tooth into a Toothlight memory, bedtime story, and parent-controlled Smile Fund preview.',
+    description: shareTagline,
+    url: '/',
+    siteName: 'Tooth Fairy Network',
+    type: 'website',
+    images: [
+      {
+        url: '/toothfairy/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: `Tooth Fairy Network - ${shareTagline}`,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Tooth Fairy Network',
+    description: shareTagline,
+    images: ['/toothfairy/opengraph-image'],
   },
 }
 
