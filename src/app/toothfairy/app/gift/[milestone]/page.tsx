@@ -17,6 +17,7 @@ import {
 import { WalletButton } from "@/components/toothfairy/app/wallet-button"
 import { C } from "@/components/toothfairy/tokens"
 import type { KeepsakeData } from "@/lib/toothfairy/keepsake-data"
+import { trackToothFairyEvent } from "@/lib/toothfairy/browser-analytics"
 import Link from "next/link"
 
 const page = {
@@ -157,6 +158,15 @@ export default function GiftPage() {
       }
 
       const txSignature = await escrowDeposit(program, publicKey, new PublicKey(childProfilePda), new PublicKey(milestonePda), amount, lockPeriodKey, depositorName.trim(), lockTimestamp)
+      trackToothFairyEvent("gift_deposit_success", {
+        tx_signature: txSignature,
+        milestone_pda: milestonePda,
+        child_profile_pda: childProfilePda,
+        deposit_amount_sol: amount,
+        lock_period: lockPeriodKey,
+        wallet: publicKey.toBase58(),
+        path: window.location.pathname,
+      })
 
       void fetch("/api/toothfairy/gift-receipt", {
         method: "POST",

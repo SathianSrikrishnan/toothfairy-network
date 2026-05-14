@@ -11,6 +11,7 @@ import { WalletModalProvider } from "@solana/wallet-adapter-react-ui"
 import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom"
 
 import { ViewModeProvider } from "@/components/toothfairy/view-mode-context"
+import { WalletAnalytics } from "@/components/toothfairy/app/wallet-analytics"
 import "@solana/wallet-adapter-react-ui/styles.css"
 
 // ThemedWrapper now reads straight from the CSS vars published by the
@@ -49,6 +50,7 @@ export default function ToothFairyAppLayout({
       <WP wallets={wallets} autoConnect>
         <WMP>
           <ViewModeProvider>
+            <WalletAnalytics />
             <ThemedWrapper>{children}</ThemedWrapper>
           </ViewModeProvider>
         </WMP>
