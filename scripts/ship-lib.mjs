@@ -66,6 +66,7 @@ export function extractPreviewUrls(comments = []) {
     const body = typeof comment?.body === "string" ? comment.body : ""
     for (const match of body.matchAll(urlPattern)) {
       const url = match[0].replace(/[.,;:]+$/, "")
+      if (url.includes("vercel.live/")) continue
       if (!seen.has(url)) {
         seen.add(url)
         urls.push(url)

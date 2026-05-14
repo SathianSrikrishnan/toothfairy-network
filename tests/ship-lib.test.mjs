@@ -46,6 +46,9 @@ test("extracts Vercel preview URLs and ignores non-preview links", () => {
     {
       body: "Docs: https://vercel.com/docs and production https://sathian.ai",
     },
+    {
+      body: "Feedback: https://vercel.live/open-feedback/sathian-ai-git-codex-homepage-sathiansrikrishnans-projects.vercel.app?via=pr-comment-feedback-link",
+    },
   ])
 
   assert.deepEqual(urls, [
