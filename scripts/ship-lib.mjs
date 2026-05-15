@@ -105,6 +105,10 @@ export function checksArePassing(checks = []) {
   return { ok: true, reason: "All reported checks are passing." }
 }
 
+export function isNoPullRequestFoundError(message = "") {
+  return String(message).toLowerCase().includes("no pull requests found")
+}
+
 export function npmCommand() {
   return process.platform === "win32" ? "npm.cmd" : "npm"
 }

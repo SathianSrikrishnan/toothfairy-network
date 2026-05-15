@@ -5,6 +5,7 @@ import {
   buildDraftBody,
   checksArePassing,
   extractPreviewUrls,
+  isNoPullRequestFoundError,
   isProtectedBranch,
   parseArgs,
 } from "../scripts/ship-lib.mjs"
@@ -74,4 +75,9 @@ test("detects passing and failing status check rollups", () => {
   ])
   assert.equal(failed.ok, false)
   assert.match(failed.reason, /build/)
+})
+
+test("detects missing pull request status errors", () => {
+  assert.equal(isNoPullRequestFoundError('no pull requests found for branch "main"'), true)
+  assert.equal(isNoPullRequestFoundError("GraphQL: Resource not accessible"), false)
 })
