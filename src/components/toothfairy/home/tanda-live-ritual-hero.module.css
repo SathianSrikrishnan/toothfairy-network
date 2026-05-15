@@ -459,6 +459,23 @@
   animation: tandaPath var(--loop) linear infinite;
 }
 
+.tanda,
+.pose,
+.wingGlow,
+.phoneScreenGlint,
+.heldCoinToken,
+.phoneGlow,
+.coinAura,
+.coinToken,
+.sourceTooth,
+.memoryCard,
+.smileCard,
+.piggyBank {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
 .pose,
 .wingGlow,
 .phoneScreenGlint,
@@ -661,6 +678,30 @@
 .sparkles span:nth-child(6) { left: 73%; top: 76%; animation-delay: 1.4s; }
 .sparkles span:nth-child(7) { left: 41%; top: 18%; animation-delay: 1.8s; }
 .sparkles span:nth-child(8) { left: 8%; top: 64%; animation-delay: 2.1s; }
+
+.motionDebug {
+  position: absolute;
+  right: 0.65rem;
+  bottom: 0.65rem;
+  z-index: 50;
+  display: grid;
+  gap: 0.18rem;
+  max-width: min(18rem, calc(100% - 1.3rem));
+  border: 1px solid rgba(17, 35, 74, 0.16);
+  border-radius: 0.55rem;
+  padding: 0.62rem 0.7rem;
+  background: rgba(255, 250, 241, 0.92);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 0.72rem;
+  line-height: 1.24;
+  box-shadow: 0 12px 24px rgba(47, 35, 80, 0.12);
+  pointer-events: none;
+}
+
+.motionDebug strong {
+  font-size: 0.74rem;
+}
 
 @keyframes tandaPath {
   0% { left: -40%; top: 20%; opacity: 0; transform: scale(.62) rotate(-7deg); }
@@ -1493,27 +1534,27 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stage *,
-  .stage *::before,
-  .stage *::after {
+  .stage:not([data-force-motion="true"]) *,
+  .stage:not([data-force-motion="true"]) *::before,
+  .stage:not([data-force-motion="true"]) *::after {
     animation: none !important;
   }
 
-  .flightTrails,
-  .phoneGlow,
-  .coinAura,
-  .sparkles,
-  .emptyPinchPatch {
+  .stage:not([data-force-motion="true"]) .flightTrails,
+  .stage:not([data-force-motion="true"]) .phoneGlow,
+  .stage:not([data-force-motion="true"]) .coinAura,
+  .stage:not([data-force-motion="true"]) .sparkles,
+  .stage:not([data-force-motion="true"]) .emptyPinchPatch {
     display: none;
   }
 
-  .sourceTooth {
+  .stage:not([data-force-motion="true"]) .sourceTooth {
     display: grid;
     opacity: 1;
     transform: none;
   }
 
-  .tanda {
+  .stage:not([data-force-motion="true"]) .tanda {
     display: block;
     left: 58%;
     top: 37%;
@@ -1521,25 +1562,25 @@
     transform: scale(.62) rotate(2deg);
   }
 
-  .pose {
+  .stage:not([data-force-motion="true"]) .pose {
     display: none;
     opacity: 0;
   }
 
-  .wave {
+  .stage:not([data-force-motion="true"]) .wave {
     display: block;
     opacity: 1;
   }
 
-  .wingGlow {
+  .stage:not([data-force-motion="true"]) .wingGlow {
     display: block;
     opacity: .56;
   }
 
-  .memoryCard,
-  .smileCard,
-  .pigGlow,
-  .slotGlow {
+  .stage:not([data-force-motion="true"]) .memoryCard,
+  .stage:not([data-force-motion="true"]) .smileCard,
+  .stage:not([data-force-motion="true"]) .pigGlow,
+  .stage:not([data-force-motion="true"]) .slotGlow {
     opacity: 1;
     transform: none;
   }

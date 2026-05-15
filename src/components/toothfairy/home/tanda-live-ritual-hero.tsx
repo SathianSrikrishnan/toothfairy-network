@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import styles from "./tanda-live-ritual-hero.module.css";
 
@@ -85,6 +88,22 @@ const poses = [
 
 const priorityPoses = new Set(["entryUp", "entryDown", "reach", "grab", "lift"]);
 
+type MotionDiagnostics = {
+  debug: boolean;
+  forceMotion: boolean;
+  reducedMotion: boolean;
+  platform: string;
+  maxTouchPoints: number;
+};
+
+const initialMotionDiagnostics: MotionDiagnostics = {
+  debug: false,
+  forceMotion: false,
+  reducedMotion: false,
+  platform: "",
+  maxTouchPoints: 0,
+};
+
 function ToothMark({ className = "" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 64 76" fill="none" aria-hidden>
@@ -116,6 +135,38 @@ function ToothMark({ className = "" }: { className?: string }) {
 }
 
 export default function TandaLiveRitualHero() {
+  const [motionDiagnostics, setMotionDiagnostics] = useState(initialMotionDiagnostics);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const updateDiagnostics = () => {
+      setMotionDiagnostics({
+        debug: params.get("motionDebug") === "1",
+        forceMotion: params.get("motion") === "force",
+        reducedMotion: reducedMotionQuery.matches,
+        platform: navigator.platform || "unknown",
+        maxTouchPoints: navigator.maxTouchPoints || 0,
+      });
+    };
+
+    updateDiagnostics();
+    if (typeof reducedMotionQuery.addEventListener === "function") {
+      reducedMotionQuery.addEventListener("change", updateDiagnostics);
+    } else {
+      reducedMotionQuery.addListener(updateDiagnostics);
+    }
+
+    return () => {
+      if (typeof reducedMotionQuery.removeEventListener === "function") {
+        reducedMotionQuery.removeEventListener("change", updateDiagnostics);
+      } else {
+        reducedMotionQuery.removeListener(updateDiagnostics);
+      }
+    };
+  }, []);
+
   return (
     <main className={styles.page}>
       <section
@@ -130,7 +181,11 @@ export default function TandaLiveRitualHero() {
           </h1>
         </div>
 
-        <div className={styles.stage} aria-label="Tanda flies across the hero image and starts a Smile Fund.">
+        <div
+          className={styles.stage}
+          aria-label="Tanda flies across the hero image and starts a Smile Fund."
+          data-force-motion={motionDiagnostics.forceMotion ? "true" : undefined}
+        >
           <div className={styles.familyFrame}>
             <Image
               src="/toothfairy/visual-system/hero-family-v1-no-spark.png"
@@ -247,6 +302,15 @@ export default function TandaLiveRitualHero() {
             <span />
             <span />
           </div>
+          {motionDiagnostics.debug ? (
+            <aside className={styles.motionDebug} aria-label="Motion diagnostics">
+              <strong>Motion debug</strong>
+              <span>reduced motion: {motionDiagnostics.reducedMotion ? "yes" : "no"}</span>
+              <span>force motion: {motionDiagnostics.forceMotion ? "yes" : "no"}</span>
+              <span>platform: {motionDiagnostics.platform}</span>
+              <span>touch points: {motionDiagnostics.maxTouchPoints}</span>
+            </aside>
+          ) : null}
         </div>
 
         <div className={styles.actions}>
