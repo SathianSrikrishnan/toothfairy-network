@@ -12,6 +12,7 @@
     "ship:draft": "node scripts/ship-draft.mjs",
     "ship:status": "node scripts/ship-status.mjs",
     "ship:merge": "node scripts/ship-merge.mjs",
+    "report:tfn": "node scripts/tfn-activity-report.mjs",
     "test:ship": "node --test tests/ship-lib.test.mjs",
     "start": "next start",
     "lint": "next lint"
