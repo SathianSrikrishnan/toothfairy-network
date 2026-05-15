@@ -45,19 +45,8 @@ function HomeFallback() {
             fontWeight: 800,
           }}
         >
-          Now turn a lost tooth into your child's first digital wallet.
+          Turn a lost tooth into your child's first digital wallet.
         </h1>
-        <p
-          style={{
-            margin: "1.25rem auto 0",
-            maxWidth: 540,
-            color: "#334260",
-            fontSize: "1.05rem",
-            lineHeight: 1.65,
-          }}
-        >
-          Start with a Toothlight memory. Parents control the wallet, the timing, and the family link.
-        </p>
         <a
           href="/toothfairy/app/draw?from=home"
           style={{

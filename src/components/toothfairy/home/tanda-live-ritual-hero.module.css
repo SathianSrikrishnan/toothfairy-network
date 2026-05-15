@@ -448,7 +448,7 @@
 .tanda {
   position: absolute;
   z-index: 14;
-  width: 30%;
+  width: 37.5%;
   aspect-ratio: 1;
   left: -8%;
   top: 28%;
@@ -1319,7 +1319,7 @@
   }
 
   .tanda {
-    width: 32%;
+    width: 40%;
   }
 
   .phoneGlow {

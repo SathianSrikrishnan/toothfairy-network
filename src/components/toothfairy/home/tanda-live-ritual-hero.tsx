@@ -125,12 +125,9 @@ export default function TandaLiveRitualHero() {
       >
         <div className={styles.copy}>
           <h1>
-            Now turn a lost tooth{" "}
+            Turn a lost tooth{" "}
             <span>into your child's first digital wallet.</span>
           </h1>
-          <p>
-            Start with a Toothlight memory. Parents control the wallet, the timing, and the family link.
-          </p>
         </div>
 
         <div className={styles.stage} aria-label="Tanda flies across the hero image and starts a Smile Fund.">
