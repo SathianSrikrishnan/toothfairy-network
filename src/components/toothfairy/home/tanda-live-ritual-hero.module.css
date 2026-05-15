@@ -119,6 +119,18 @@
   overflow: visible;
 }
 
+.iosVideoFallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: stretch;
+}
+
+.iosVideoFallback > * {
+  width: 100%;
+  height: 100%;
+}
+
 .stage::after {
   position: absolute;
   inset: -4% -3% -5%;

@@ -1,5 +1,9 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import styles from "./tanda-live-ritual-hero.module.css";
+import TandaRitualHeroVideo from "./tanda-ritual-hero-video";
 
 const liveAssetRoot = "/toothfairy/animation/live-hero-v1";
 const liveAssetVersion = "asset-fix-2";
@@ -116,6 +120,16 @@ function ToothMark({ className = "" }: { className?: string }) {
 }
 
 export default function TandaLiveRitualHero() {
+  const [useIOSVideoFallback, setUseIOSVideoFallback] = useState(false);
+
+  useEffect(() => {
+    const platform = navigator.platform || "";
+    const userAgent = navigator.userAgent || "";
+    const isTouchMac = platform === "MacIntel" && navigator.maxTouchPoints > 1;
+    const isIOS = /iPad|iPhone|iPod/.test(userAgent) || isTouchMac;
+    setUseIOSVideoFallback(isIOS);
+  }, []);
+
   return (
     <main className={styles.page}>
       <section
@@ -131,6 +145,12 @@ export default function TandaLiveRitualHero() {
         </div>
 
         <div className={styles.stage} aria-label="Tanda flies across the hero image and starts a Smile Fund.">
+          {useIOSVideoFallback ? (
+            <div className={styles.iosVideoFallback}>
+              <TandaRitualHeroVideo />
+            </div>
+          ) : (
+            <>
           <div className={styles.familyFrame}>
             <Image
               src="/toothfairy/visual-system/hero-family-v1-no-spark.png"
@@ -247,6 +267,8 @@ export default function TandaLiveRitualHero() {
             <span />
             <span />
           </div>
+            </>
+          )}
         </div>
 
         <div className={styles.actions}>
