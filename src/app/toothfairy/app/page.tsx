@@ -18,6 +18,7 @@ import Link from "next/link"
 import { createBrowserSupabase } from "@/lib/supabase-auth"
 import TellStep from "@/components/toothfairy/app/tell-step"
 import { useRouter } from "next/navigation"
+import { trackToothFairyEvent } from "@/lib/toothfairy/browser-analytics"
 
 // Parent-facing ritual flow.
 // Every step should feel like preserving a keepsake first and touching crypto second.
@@ -611,6 +612,15 @@ export default function ToothFairyApp() {
         childProfilePda: mintData.childProfilePda,
         milestonePda: mintData.milestonePda,
       })
+      trackToothFairyEvent("mint_success", {
+        signature: mintData.signature,
+        milestone_pda: mintData.milestonePda,
+        child_profile_pda: mintData.childProfilePda,
+        milestone_index: Number(mintData.milestoneIndex ?? 0),
+        has_wallet_connected: Boolean(publicKey),
+        wallet: publicKey?.toBase58() ?? null,
+        path: window.location.pathname,
+      })
 
       setMintProgress("Almost done...")
 
@@ -643,7 +653,16 @@ export default function ToothFairyApp() {
       let lockTimestamp: number | undefined
       if (lockChoice === "ageTen" && suggestedUnlockBirthday) lockTimestamp = suggestedUnlockBirthday
       if (lockChoice === "custom" && customLockDate) lockTimestamp = Math.floor(new Date(customLockDate + "T00:00:00").getTime() / 1000)
-      await escrowDeposit(program, publicKey, new PublicKey(escrowInfo.childProfilePda), new PublicKey(escrowInfo.milestonePda), parseFloat(depositAmount), lockPeriod, depositorName.trim(), lockTimestamp)
+      const txSignature = await escrowDeposit(program, publicKey, new PublicKey(escrowInfo.childProfilePda), new PublicKey(escrowInfo.milestonePda), parseFloat(depositAmount), lockPeriod, depositorName.trim(), lockTimestamp)
+      trackToothFairyEvent("gift_deposit_success", {
+        tx_signature: txSignature,
+        milestone_pda: escrowInfo.milestonePda,
+        child_profile_pda: escrowInfo.childProfilePda,
+        deposit_amount_sol: Number(depositAmount),
+        lock_period: lockPeriod,
+        wallet: publicKey.toBase58(),
+        path: window.location.pathname,
+      })
       setDepositSuccess(`${depositAmount} SOL deposited for ${childName}!`)
       const program2 = getEscrowProgram(anchorProvider)
       const allDeps = await fetchDepositsForMilestone(program2, new PublicKey(escrowInfo.milestonePda))
