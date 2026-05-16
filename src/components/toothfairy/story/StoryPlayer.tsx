@@ -944,7 +944,7 @@ function CtaLayout({ scene, accentColor, nextStory, story }: {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          <Link href="/toothfairy/story" className="text-xs no-underline" style={{ color: c.textSoft }}>
+          <Link href="/toothfairy/stories" className="text-xs no-underline" style={{ color: c.textSoft }}>
             &larr; All stories
           </Link>
           {nextStory && (
@@ -1103,10 +1103,10 @@ function FullFrameReader({
         }}
       />
 
-      <div className="relative z-20 mx-auto flex min-h-[100dvh] w-full max-w-[1220px] flex-col px-4 py-4 sm:px-6 lg:px-8">
-        <header className="mb-4 flex items-center justify-between gap-3">
+      <div className="relative z-20 mx-auto flex min-h-[100dvh] w-full max-w-[1260px] flex-col px-3 py-3 sm:px-5 sm:py-4 lg:px-8">
+        <header className="mb-3 flex items-center justify-between gap-3 sm:mb-4">
           <Link
-            href="/toothfairy/story"
+            href="/toothfairy/stories"
             className="rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] no-underline"
             style={{
               color: c.text,
@@ -1116,9 +1116,14 @@ function FullFrameReader({
           >
             All stories
           </Link>
-          <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: `${c.textSoft}` }}>
-            {current + 1} / {story.scenes.length}
-          </p>
+          <div className="min-w-0 text-right">
+            <p className="truncate text-xs font-bold uppercase tracking-[0.16em]" style={{ color: `${c.textSoft}` }}>
+              {story.title}
+            </p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: accentColor }}>
+              {current + 1} / {story.scenes.length}
+            </p>
+          </div>
         </header>
 
         <AnimatePresence mode="wait" custom={direction}>
@@ -1130,39 +1135,52 @@ function FullFrameReader({
             animate="center"
             exit="exit"
             transition={{ duration: 0.38, ease: ease.out }}
-            className="grid flex-1 grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.08fr)_minmax(340px,0.92fr)] lg:items-center"
+            className="grid flex-1 grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-[minmax(0,1.12fr)_minmax(360px,0.88fr)] lg:items-center"
           >
             <figure
-              className="flex min-h-[250px] items-center justify-center overflow-hidden rounded-lg p-2 sm:min-h-[330px] lg:min-h-[calc(100dvh-150px)]"
+              className="relative mx-auto flex aspect-[4/5] max-h-[56dvh] w-full max-w-[520px] items-center justify-center overflow-hidden rounded-lg p-2 sm:aspect-[4/3] sm:max-h-[58dvh] sm:max-w-[760px] lg:aspect-[4/3] lg:max-h-[calc(100dvh-148px)] lg:max-w-none lg:p-3"
               style={{
-                background: 'rgba(5, 8, 13, 0.46)',
-                border: `1px solid ${accentColor}2e`,
-                boxShadow: '0 28px 80px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.05)',
+                background: `linear-gradient(145deg, rgba(255,255,255,0.065), rgba(5,8,13,0.72)), ${c.nightDeep}`,
+                border: `1px solid ${accentColor}38`,
+                boxShadow: '0 28px 80px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.08)',
               }}
             >
+              <span
+                className="pointer-events-none absolute inset-2 rounded-md"
+                style={{
+                  border: `1px solid ${accentColor}22`,
+                  boxShadow: `inset 0 0 42px ${accentColor}12`,
+                }}
+              />
               <img
                 src={scene.background}
                 alt=""
-                className="block h-auto max-h-[52dvh] w-full object-contain lg:max-h-[calc(100dvh-190px)]"
+                className="relative z-10 block h-full w-full rounded-md object-contain"
                 style={{ filter: 'drop-shadow(0 20px 44px rgba(0,0,0,0.36))' }}
               />
             </figure>
 
             <article
-              className="rounded-lg p-5 sm:p-6 lg:max-h-[calc(100dvh-150px)] lg:overflow-y-auto"
+              className="rounded-lg p-4 sm:p-5 lg:max-h-[calc(100dvh-148px)] lg:overflow-y-auto lg:p-6"
               style={{
-                background: 'rgba(12, 18, 24, 0.82)',
-                border: `1px solid ${accentColor}32`,
-                boxShadow: '0 24px 70px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.07)',
+                background: 'linear-gradient(180deg, rgba(12, 18, 24, 0.88), rgba(7, 11, 18, 0.96))',
+                border: `1px solid ${accentColor}36`,
+                boxShadow: '0 24px 70px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.08)',
                 backdropFilter: 'blur(18px)',
               }}
             >
-              <p
-                className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em]"
-                style={{ color: accentColor }}
-              >
-                {story.region}
-              </p>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <p
+                  className="m-0 text-[11px] font-bold uppercase tracking-[0.18em]"
+                  style={{ color: accentColor }}
+                >
+                  {story.region}
+                </p>
+                <span
+                  className="h-px flex-1"
+                  style={{ background: `linear-gradient(90deg, ${accentColor}55, transparent)` }}
+                />
+              </div>
 
               {scene.dialogue.speaker && (
                 <p
@@ -1174,7 +1192,7 @@ function FullFrameReader({
               )}
 
               <h1
-                className={`${isCover ? 'text-4xl sm:text-5xl' : 'text-2xl sm:text-3xl'} mb-4 font-bold leading-[1.08]`}
+                className={`${isCover ? 'text-3xl sm:text-5xl' : 'text-[1.45rem] sm:text-3xl'} mb-4 font-bold leading-[1.08]`}
                 style={{
                   color: isCover ? accentColor : c.text,
                   fontFamily: "var(--font-display, 'Alegreya'), Georgia, serif",
@@ -1186,7 +1204,7 @@ function FullFrameReader({
 
               <ReaderParagraphs
                 text={scene.dialogue.subtext}
-                className="mb-4 text-[17px] leading-relaxed"
+                className="mb-4 text-[16px] leading-relaxed sm:text-[17px]"
               />
 
               <div className="flex flex-col gap-3">
@@ -1223,7 +1241,7 @@ function FullFrameReader({
           </motion.section>
         </AnimatePresence>
 
-        <footer className="mt-4 flex flex-col items-center gap-3 pb-1">
+        <footer className="mt-3 flex flex-col items-center gap-3 pb-1 sm:mt-4">
           <PageDots total={story.scenes.length} current={current} color={accentColor} />
           <div className="flex items-center gap-3">
             <button

@@ -459,6 +459,23 @@
   animation: tandaPath var(--loop) linear infinite;
 }
 
+.tanda,
+.pose,
+.wingGlow,
+.phoneScreenGlint,
+.heldCoinToken,
+.phoneGlow,
+.coinAura,
+.coinToken,
+.sourceTooth,
+.memoryCard,
+.smileCard,
+.piggyBank {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
 .pose,
 .wingGlow,
 .phoneScreenGlint,
@@ -661,6 +678,30 @@
 .sparkles span:nth-child(6) { left: 73%; top: 76%; animation-delay: 1.4s; }
 .sparkles span:nth-child(7) { left: 41%; top: 18%; animation-delay: 1.8s; }
 .sparkles span:nth-child(8) { left: 8%; top: 64%; animation-delay: 2.1s; }
+
+.motionDebug {
+  position: absolute;
+  right: 0.65rem;
+  bottom: 0.65rem;
+  z-index: 50;
+  display: grid;
+  gap: 0.18rem;
+  max-width: min(18rem, calc(100% - 1.3rem));
+  border: 1px solid rgba(17, 35, 74, 0.16);
+  border-radius: 0.55rem;
+  padding: 0.62rem 0.7rem;
+  background: rgba(255, 250, 241, 0.92);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 0.72rem;
+  line-height: 1.24;
+  box-shadow: 0 12px 24px rgba(47, 35, 80, 0.12);
+  pointer-events: none;
+}
+
+.motionDebug strong {
+  font-size: 0.74rem;
+}
 
 @keyframes tandaPath {
   0% { left: -40%; top: 20%; opacity: 0; transform: scale(.62) rotate(-7deg); }
@@ -901,25 +942,35 @@
 }
 
 .storyWorld {
+  position: relative;
   width: 100%;
   margin: 0;
   background:
-    radial-gradient(circle at 78% 6%, rgba(255, 215, 106, 0.2), transparent 24rem),
-    radial-gradient(circle at 13% 18%, rgba(81, 189, 232, 0.13), transparent 20rem),
-    linear-gradient(135deg, #11234a 0%, #142c44 48%, #172b25 100%);
+    linear-gradient(90deg, rgba(255, 250, 241, 0.035) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255, 215, 106, 0.08), transparent 32%),
+    linear-gradient(135deg, #0d1730 0%, #122a32 46%, #19251b 100%);
+  background-size: 44px 44px, auto, auto;
   color: #fffaf1;
-  padding: clamp(3.2rem, 7vw, 5.5rem) 0;
+  padding: clamp(3.4rem, 7vw, 5.8rem) 0 clamp(4.2rem, 8vw, 7rem);
+  overflow: hidden;
 }
 
-.storyIntro {
+.networkShell {
   display: grid;
   width: min(100% - 2.5rem, 1180px);
-  max-width: 720px;
-  gap: 0.72rem;
-  margin: 0 auto 1.15rem;
+  gap: 1rem;
+  margin: 0 auto;
 }
 
-.storyIntro p {
+.networkIntro {
+  display: grid;
+  max-width: 760px;
+  gap: 0.72rem;
+}
+
+.networkIntro p,
+.doorBoardHeader p,
+.futureIntro p {
   margin: 0;
   color: #ffd76a;
   font-size: 0.76rem;
@@ -928,7 +979,7 @@
   text-transform: uppercase;
 }
 
-.storyIntro h2 {
+.networkIntro h2 {
   margin: 0;
   color: #fffaf1;
   font-family: var(--font-display), Georgia, serif;
@@ -939,67 +990,992 @@
   text-wrap: balance;
 }
 
-.storyIntro span {
+.networkIntro span {
+  max-width: 48rem;
   color: rgba(255, 250, 241, 0.78);
   font-size: clamp(1rem, 1.7vw, 1.12rem);
   line-height: 1.6;
 }
 
-.storyStrip {
-  display: grid;
-  width: min(100% - 2.5rem, 1180px);
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.85rem;
-  margin: 0 auto;
-}
-
-.storyCard {
-  display: grid;
-  min-height: 100%;
-  overflow: hidden;
-  border: 1px solid rgba(255, 250, 241, 0.18);
-  border-radius: 8px;
-  background: rgba(255, 250, 241, 0.08);
-  color: inherit;
-  text-decoration: none;
-  box-shadow: 0 24px 58px rgba(7, 16, 34, 0.18);
-}
-
-.storyImage {
+.gatewayScene {
   position: relative;
-  aspect-ratio: 16 / 10;
+  min-height: min(780px, calc(100vh - 62px));
   overflow: hidden;
-  background: #1c2b3f;
+  border: 1px solid rgba(255, 250, 241, 0.14);
+  border-radius: 8px;
+  background: #07101f;
+  box-shadow: 0 30px 80px rgba(2, 8, 20, 0.36);
+  isolation: isolate;
 }
 
-.storyImage img {
+.gatewayImage {
+  z-index: 0;
   object-fit: cover;
-  object-position: center;
+  object-position: center 45%;
+  transform: scale(1.02);
 }
 
-.storyCard > span {
-  margin: 0.9rem 0.9rem 0;
-  color: #ffd76a;
-  font-size: 0.7rem;
+.gatewayShade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(90deg, rgba(4, 9, 20, 0.44), transparent 28%, transparent 72%, rgba(4, 9, 20, 0.42)),
+    linear-gradient(180deg, rgba(4, 9, 20, 0.08), rgba(4, 9, 20, 0.2) 58%, rgba(4, 9, 20, 0.72));
+  pointer-events: none;
+}
+
+.gatewayThreads {
+  position: absolute;
+  inset: 9% 5% 18%;
+  z-index: 2;
+  width: 90%;
+  height: 73%;
+  overflow: visible;
+  opacity: 0.28;
+  pointer-events: none;
+  filter: drop-shadow(0 0 15px rgba(255, 215, 106, 0.4));
+  transition: opacity 180ms ease, filter 180ms ease;
+}
+
+.gatewayThreads path {
+  fill: none;
+  stroke: rgba(255, 221, 124, 0.56);
+  stroke-dasharray: 8 18;
+  stroke-linecap: round;
+  stroke-width: 2.2;
+  animation: mapThreadFlow 9s linear infinite;
+  animation-play-state: paused;
+}
+
+.gatewayThreads path:nth-child(2) {
+  stroke: rgba(107, 203, 214, 0.44);
+  animation-duration: 11s;
+}
+
+.gatewayThreads path:nth-child(3) {
+  stroke: rgba(240, 111, 115, 0.34);
+  animation-duration: 12s;
+}
+
+.gatewayThreads path:nth-child(4) {
+  stroke: rgba(255, 215, 106, 0.32);
+  animation-duration: 14s;
+}
+
+.gatewayValuePulse {
+  stroke: rgba(255, 246, 191, 0.78) !important;
+  stroke-dasharray: 1 34 !important;
+  stroke-width: 5 !important;
+  opacity: 0;
+  filter:
+    drop-shadow(0 0 10px rgba(255, 215, 106, 0.74))
+    drop-shadow(0 0 22px rgba(40, 185, 154, 0.28));
+  animation: gatewayValuePulse 11.5s cubic-bezier(.34, .02, .22, 1) infinite !important;
+  animation-play-state: paused !important;
+}
+
+.gatewayThreads circle {
+  fill: rgba(255, 246, 191, 0.92);
+  stroke: rgba(255, 215, 106, 0.72);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: drop-shadow(0 0 12px rgba(255, 215, 106, 0.62));
+  animation: gatewayNodePulse 7s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.gatewayScene:has(.gatewayDoor:hover) .gatewayThreads,
+.gatewayScene:has(.gatewayDoor:focus-visible) .gatewayThreads {
+  opacity: 0.84;
+  filter: drop-shadow(0 0 20px rgba(255, 215, 106, 0.52));
+}
+
+.gatewayScene:has(.gatewayDoor:hover) .gatewayThreads path,
+.gatewayScene:has(.gatewayDoor:focus-visible) .gatewayThreads path,
+.gatewayScene:has(.gatewayDoor:hover) .gatewayThreads circle,
+.gatewayScene:has(.gatewayDoor:focus-visible) .gatewayThreads circle,
+.gatewayScene:has(.gatewayDoor:hover) .gatewayValuePulse,
+.gatewayScene:has(.gatewayDoor:focus-visible) .gatewayValuePulse {
+  animation-play-state: running !important;
+}
+
+.gatewayNodeB {
+  animation-delay: 0.8s !important;
+}
+
+.gatewayNodeC {
+  animation-delay: 1.4s !important;
+}
+
+.gatewayNodeD {
+  animation-delay: 2.2s !important;
+}
+
+.gatewayDoorLayer,
+.futureGatewayLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.gatewayDoor,
+.futureGatewayDoor,
+.gatewayContributionDoor {
+  position: absolute;
+  left: var(--door-x);
+  top: var(--door-y);
+  transform: translate(-50%, -50%) scale(var(--door-scale));
+}
+
+.gatewayDoor {
+  z-index: 6;
+  display: block;
+  width: clamp(4.7rem, 8vw, 7.2rem);
+  aspect-ratio: 0.72 / 1;
+  border: 1px solid color-mix(in srgb, var(--door-accent) 72%, rgba(255, 250, 241, 0.24));
+  border-radius: 999px 999px 8px 8px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--door-accent) 16%, rgba(255, 250, 241, 0.04)), rgba(3, 7, 16, 0.7)),
+    rgba(5, 10, 22, 0.5);
+  color: #fffaf1;
+  isolation: isolate;
+  pointer-events: auto;
+  text-decoration: none;
+  box-shadow:
+    0 0 0 1px rgba(255, 250, 241, 0.08),
+    0 0 22px color-mix(in srgb, var(--door-accent) 34%, transparent),
+    0 18px 32px rgba(0, 0, 0, 0.26);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.gatewayDoor::before {
+  position: absolute;
+  inset: 9% 13% 13%;
+  border: 1px solid color-mix(in srgb, var(--door-accent) 46%, rgba(255, 250, 241, 0.14));
+  border-radius: 999px 999px 5px 5px;
+  background:
+    linear-gradient(180deg, rgba(255, 250, 241, 0.08), rgba(5, 10, 22, 0.4)),
+    radial-gradient(circle at 50% 21%, color-mix(in srgb, var(--door-accent) 38%, transparent), transparent 48%);
+  content: "";
+}
+
+.gatewayDoor::after {
+  position: absolute;
+  inset: -8%;
+  z-index: -1;
+  border: 1px solid color-mix(in srgb, var(--door-accent) 46%, transparent);
+  border-radius: 999px 999px 12px 12px;
+  box-shadow: 0 0 22px color-mix(in srgb, var(--door-accent) 32%, transparent);
+  content: "";
+  opacity: 0.34;
+  transform: scale(0.96);
+  animation: gatewayDoorBreath 6.8s ease-in-out infinite;
+  animation-delay: calc(var(--door-index) * -0.62s);
+}
+
+.gatewayDoorViking::before {
+  border-radius: 26px 26px 8px 8px;
+  clip-path: polygon(50% 0, 94% 14%, 100% 100%, 0 100%, 6% 14%);
+}
+
+.gatewayDoorPerez::before {
+  border-radius: 54% 54% 12px 12px / 46% 46% 12px 12px;
+}
+
+.gatewayDoorKkachi::before {
+  border-radius: 12px 12px 8px 8px;
+  clip-path: polygon(50% 0, 96% 24%, 94% 100%, 6% 100%, 4% 24%);
+}
+
+.gatewayDoorWaraba::before {
+  border-radius: 48% 54% 12px 10px / 34% 45% 12px 10px;
+}
+
+.gatewayDoorDaga::before {
+  border-radius: 46% 46% 10px 10px;
+  background:
+    radial-gradient(circle at 72% 22%, rgba(255, 250, 241, 0.22), transparent 24%),
+    linear-gradient(180deg, rgba(255, 250, 241, 0.08), rgba(5, 10, 22, 0.4)),
+    radial-gradient(circle at 50% 21%, color-mix(in srgb, var(--door-accent) 38%, transparent), transparent 48%);
+}
+
+.gatewayDoorAnna::before {
+  border-radius: 999px 999px 22px 22px;
+  background:
+    repeating-radial-gradient(circle at 50% 28%, color-mix(in srgb, var(--door-accent) 20%, transparent) 0 3px, transparent 3px 9px),
+    linear-gradient(180deg, rgba(255, 250, 241, 0.08), rgba(5, 10, 22, 0.4)),
+    radial-gradient(circle at 50% 21%, color-mix(in srgb, var(--door-accent) 38%, transparent), transparent 48%);
+}
+
+.gatewayDoorGlow {
+  position: absolute;
+  inset: 14%;
+  z-index: 1;
+  border-radius: inherit;
+  background: radial-gradient(circle at 50% 36%, color-mix(in srgb, var(--door-accent) 42%, transparent), transparent 68%);
+  filter: blur(7px);
+  opacity: 0.76;
+  pointer-events: none;
+}
+
+.gatewayDoorCharm {
+  position: absolute;
+  left: 50%;
+  top: 43%;
+  z-index: 4;
+  display: block;
+  width: 1.32rem;
+  height: 1.32rem;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.gatewayDoorCharm::before,
+.gatewayDoorCharm::after {
+  position: absolute;
+  content: "";
+}
+
+.gatewayDoorTanda .gatewayDoorCharm::before {
+  inset: 7% 22% 6%;
+  border: 2px solid color-mix(in srgb, var(--door-accent) 74%, #fffaf1);
+  border-radius: 52% 52% 46% 46%;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--door-accent) 60%, transparent);
+}
+
+.gatewayDoorViking .gatewayDoorCharm::before {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background: color-mix(in srgb, var(--door-accent) 76%, #fffaf1);
+  box-shadow: 0 -5px 0 rgba(255, 250, 241, 0.28), 0 5px 0 rgba(255, 250, 241, 0.28);
+}
+
+.gatewayDoorPerez .gatewayDoorCharm::before {
+  inset: 12%;
+  border: 2px solid color-mix(in srgb, var(--door-accent) 72%, #fffaf1);
+  border-radius: 50%;
+  background: rgba(255, 250, 241, 0.12);
+}
+
+.gatewayDoorKkachi .gatewayDoorCharm::before {
+  left: 47%;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--door-accent) 70%, #fffaf1);
+  box-shadow: 6px 2px 0 -1px rgba(255, 250, 241, 0.34);
+  transform: rotate(28deg);
+}
+
+.gatewayDoorWaraba .gatewayDoorCharm::before {
+  inset: 18% 4%;
+  border-radius: 42% 58% 48% 52%;
+  background: color-mix(in srgb, var(--door-accent) 64%, #fffaf1);
+  box-shadow: inset 0 0 0 2px rgba(4, 9, 20, 0.32);
+}
+
+.gatewayDoorDaga .gatewayDoorCharm::before {
+  inset: 4%;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--door-accent) 58%, #fffaf1);
+}
+
+.gatewayDoorDaga .gatewayDoorCharm::after {
+  inset: -2% 12% 8% 28%;
+  border-radius: 50%;
+  background: #07101f;
+}
+
+.gatewayDoorAnna .gatewayDoorCharm::before {
+  inset: 9%;
+  border: 2px solid color-mix(in srgb, var(--door-accent) 74%, #fffaf1);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 3px rgba(255, 250, 241, 0.18);
+}
+
+.gatewayDoor:hover,
+.gatewayDoor:focus-visible {
+  border-color: color-mix(in srgb, var(--door-accent) 86%, #fffaf1);
+  box-shadow:
+    0 0 0 1px rgba(255, 250, 241, 0.16),
+    0 0 36px color-mix(in srgb, var(--door-accent) 58%, transparent),
+    0 24px 40px rgba(0, 0, 0, 0.28);
+  transform: translate(-50%, -54%) scale(calc(var(--door-scale) * 1.08));
+}
+
+.gatewayDoorNumber {
+  position: absolute;
+  left: 50%;
+  top: 18%;
+  z-index: 3;
+  display: grid;
+  width: 1.52rem;
+  height: 1.52rem;
+  place-items: center;
+  border: 1px solid rgba(255, 250, 241, 0.46);
+  border-radius: 50%;
+  background: rgba(5, 10, 22, 0.78);
+  color: #fff7c4;
+  font-size: 0.72rem;
   font-weight: 950;
-  letter-spacing: 0.14em;
+  transform: translateX(-50%);
+}
+
+.gatewayDoorPreview {
+  position: absolute;
+  left: 50%;
+  bottom: 17%;
+  z-index: 2;
+  display: block;
+  width: 56%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid rgba(255, 250, 241, 0.2);
+  border-radius: 50%;
+  background: rgba(255, 250, 241, 0.08);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--door-accent) 26%, transparent);
+  transform: translateX(-50%);
+}
+
+.gatewayDoorPreview img {
+  object-fit: cover;
+}
+
+.gatewayDoorText {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.55rem);
+  z-index: 12;
+  display: grid;
+  width: min(13rem, 42vw);
+  gap: 0.18rem;
+  border: 1px solid color-mix(in srgb, var(--door-accent) 42%, rgba(255, 250, 241, 0.12));
+  border-radius: 8px;
+  background: rgba(4, 9, 20, 0.84);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.3);
+  padding: 0.62rem 0.68rem;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 0.24rem);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.gatewayDoor:hover .gatewayDoorText,
+.gatewayDoor:focus-visible .gatewayDoorText {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.gatewayDoorText small {
+  color: var(--door-accent);
+  font-size: 0.62rem;
+  font-weight: 950;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-.storyCard h3 {
-  margin: 0.34rem 0.9rem 0;
+.gatewayDoorText strong {
   color: #fffaf1;
   font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(1.3rem, 2vw, 1.7rem);
-  letter-spacing: 0;
+  font-size: 1.08rem;
+  line-height: 1;
+}
+
+.futureGatewayDoor {
+  z-index: 4;
+  display: grid;
+  width: clamp(2.15rem, 4.7vw, 3.8rem);
+  aspect-ratio: 0.74 / 1;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--door-accent) 38%, rgba(255, 250, 241, 0.12));
+  border-radius: 999px 999px 5px 5px;
+  background:
+    radial-gradient(circle at 50% 28%, color-mix(in srgb, var(--door-accent) 30%, transparent), transparent 56%),
+    rgba(4, 9, 20, 0.48);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--door-accent) 22%, transparent);
+  opacity: 0.84;
+  pointer-events: auto;
+  animation: futureDoorListen 9s ease-in-out infinite;
+  animation-delay: calc(var(--door-index) * -0.8s);
+}
+
+.futureGatewayDoor span {
+  position: absolute;
+  top: calc(100% + 0.28rem);
+  left: 50%;
+  width: max-content;
+  max-width: 7.8rem;
+  color: rgba(255, 250, 241, 0.62);
+  font-size: 0.58rem;
+  font-weight: 850;
+  line-height: 1.05;
+  text-align: center;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+  transform: translateX(-50%);
+}
+
+.gatewayContributionDoor {
+  z-index: 7;
+  display: grid;
+  width: clamp(7.6rem, 12vw, 10rem);
+  min-height: 5rem;
+  place-items: center;
+  border: 1px solid rgba(255, 215, 106, 0.46);
+  border-radius: 999px 999px 8px 8px;
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 215, 106, 0.13) 0 1px, transparent 1px 12px),
+    rgba(4, 9, 20, 0.66);
+  color: #fffaf1;
+  gap: 0.18rem;
+  padding: 0.68rem;
+  pointer-events: auto;
+  text-align: center;
+  text-decoration: none;
+  box-shadow:
+    0 0 0 1px rgba(255, 250, 241, 0.08),
+    0 0 26px rgba(255, 215, 106, 0.24);
+}
+
+.gatewayContributionDoor span {
+  display: grid;
+  width: 1.55rem;
+  height: 1.55rem;
+  place-items: center;
+  border: 1px solid rgba(255, 250, 241, 0.38);
+  border-radius: 50%;
+  color: #ffd76a;
+  font-weight: 950;
+}
+
+.gatewayContributionDoor strong {
+  color: #fffaf1;
+  font-size: 0.78rem;
+  line-height: 1.1;
+}
+
+.gatewayLegend {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 9;
+  display: flex;
+  max-width: min(43rem, calc(100% - 2rem));
+  align-items: center;
+  gap: 0.8rem;
+  border: 1px solid rgba(255, 250, 241, 0.14);
+  border-radius: 999px;
+  background: rgba(4, 9, 20, 0.62);
+  color: rgba(255, 250, 241, 0.82);
+  padding: 0.58rem 0.68rem 0.58rem 0.9rem;
+  backdrop-filter: blur(16px);
+}
+
+.gatewayLegend p,
+.gatewayLegend span {
+  margin: 0;
+}
+
+.gatewayLegend p {
+  color: #fff7c4;
+  font-weight: 950;
+}
+
+.gatewayLegend span {
+  font-size: 0.86rem;
+}
+
+.gatewayLegend a {
+  display: inline-flex;
+  min-height: 2.35rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #ffd76a;
+  color: #081123;
+  font-size: 0.84rem;
+  font-weight: 950;
+  padding: 0 0.86rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.gatewayStoryRail {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.gatewayStoryChip {
+  display: grid;
+  min-height: 3.2rem;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.52rem;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--door-accent) 42%, rgba(255, 250, 241, 0.12));
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--door-accent) 18%, transparent), transparent 66%),
+    rgba(255, 250, 241, 0.08);
+  color: #fffaf1;
+  padding: 0.58rem 0.62rem;
+  text-decoration: none;
+}
+
+.gatewayStoryChip span {
+  display: grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--door-accent) 72%, rgba(5, 10, 22, 0.5));
+  color: #fffaf1;
+  font-size: 0.66rem;
+  font-weight: 950;
+}
+
+.gatewayStoryChip strong {
+  overflow: hidden;
+  color: rgba(255, 250, 241, 0.86);
+  font-size: 0.78rem;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.networkStage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(340px, 0.9fr);
+  gap: 1rem;
+  align-items: stretch;
+  min-height: min(720px, calc(100vh - 64px));
+}
+
+.mapPanel,
+.doorBoard,
+.futureRunway {
+  border: 1px solid rgba(255, 250, 241, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 250, 241, 0.075);
+  box-shadow: 0 28px 70px rgba(2, 8, 20, 0.25);
+}
+
+.mapPanel {
+  position: relative;
+  min-height: 34rem;
+  overflow: hidden;
+}
+
+.mapImage {
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.04);
+}
+
+.mapShade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(7, 12, 26, 0.62), rgba(7, 12, 26, 0.2) 48%, rgba(7, 12, 26, 0.7)),
+    linear-gradient(180deg, rgba(7, 12, 26, 0.1), rgba(7, 12, 26, 0.82));
+}
+
+.mapThreads {
+  position: absolute;
+  inset: 5% 4% 18%;
+  z-index: 3;
+  overflow: visible;
+  opacity: 0.92;
+  filter: drop-shadow(0 0 16px rgba(255, 215, 106, 0.48));
+}
+
+.mapThreads path {
+  fill: none;
+  stroke: rgba(255, 215, 106, 0.72);
+  stroke-dasharray: 9 15;
+  stroke-linecap: round;
+  stroke-width: 2;
+  animation: mapThreadFlow 8s linear infinite;
+}
+
+.mapThreads path + path {
+  animation-duration: 10s;
+}
+
+.mapThreads circle {
+  fill: #fff7c4;
+  stroke: rgba(255, 215, 106, 0.9);
+  stroke-width: 2;
+}
+
+.thinToothlight {
+  position: absolute;
+  left: 7%;
+  top: 8%;
+  z-index: 5;
+  display: grid;
+  width: 5.9rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgba(255, 250, 241, 0.15);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(255, 250, 241, 0.16), transparent 58%),
+    rgba(5, 10, 22, 0.34);
+  box-shadow:
+    inset 0 0 34px rgba(255, 250, 241, 0.08),
+    0 0 34px rgba(255, 215, 106, 0.16);
+  backdrop-filter: blur(10px);
+}
+
+.thinToothlight::before {
+  position: absolute;
+  inset: -1.8rem;
+  border: 1px dashed rgba(255, 215, 106, 0.24);
+  border-radius: 50%;
+  content: "";
+  animation: mapThreadFlow 12s linear infinite;
+}
+
+.thinToothlight svg {
+  position: relative;
+  z-index: 2;
+  width: 2.6rem;
+  opacity: 0.58;
+  filter: grayscale(0.75) drop-shadow(0 0 18px rgba(255, 215, 106, 0.34));
+}
+
+.thinToothlight span {
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 1px solid rgba(255, 250, 241, 0.28);
+  border-radius: 50%;
+  background: rgba(255, 250, 241, 0.05);
+}
+
+.thinToothlight span:nth-of-type(1) {
+  right: -1.05rem;
+  top: 0.65rem;
+}
+
+.thinToothlight span:nth-of-type(2) {
+  right: -1.45rem;
+  bottom: 1.15rem;
+}
+
+.thinToothlight span:nth-of-type(3) {
+  left: -1.05rem;
+  bottom: 0.75rem;
+}
+
+.memoryNodeLayer {
+  position: absolute;
+  inset: 6% 5% 8%;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.memoryNode {
+  position: absolute;
+  display: block;
+  width: clamp(3.7rem, 6.4vw, 5rem);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 2px solid color-mix(in srgb, var(--door-accent) 72%, rgba(255, 250, 241, 0.2));
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--door-accent) 20%, transparent), rgba(5, 10, 22, 0.7));
+  box-shadow:
+    0 0 0 1px rgba(255, 250, 241, 0.12),
+    0 0 24px color-mix(in srgb, var(--door-accent) 36%, transparent);
+  color: inherit;
+  pointer-events: auto;
+  text-decoration: none;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.memoryNode:nth-child(1) { left: 19%; top: 61%; }
+.memoryNode:nth-child(2) { left: 38%; top: 50%; }
+.memoryNode:nth-child(3) { left: 61%; top: 61%; }
+.memoryNode:nth-child(4) { left: 75%; top: 35%; }
+.memoryNode:nth-child(5) { left: 14%; top: 35%; }
+.memoryNode:nth-child(6) { left: 43%; top: 21%; }
+.memoryNode:nth-child(7) { left: 64%; top: 15%; }
+
+.memoryNode:hover {
+  box-shadow:
+    0 0 0 1px rgba(255, 250, 241, 0.18),
+    0 0 34px color-mix(in srgb, var(--door-accent) 52%, transparent);
+  transform: translateY(-0.22rem) scale(1.04);
+}
+
+.memoryNode img {
+  object-fit: cover;
+  filter: saturate(0.92) contrast(1.04);
+}
+
+.memoryNode span {
+  position: absolute;
+  right: 0.22rem;
+  bottom: 0.18rem;
+  z-index: 2;
+  display: grid;
+  width: 1.28rem;
+  height: 1.28rem;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(5, 10, 22, 0.76);
+  color: #fff7c4;
+  font-size: 0.66rem;
+  font-weight: 950;
+}
+
+.doorBoard {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 0.8rem;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(255, 215, 106, 0.13), transparent 28%),
+    rgba(255, 250, 241, 0.075);
+  padding: 0.88rem;
+}
+
+.doorBoardHeader {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.26rem 0.12rem 0.1rem;
+}
+
+.doorBoardHeader strong {
+  max-width: 28rem;
+  color: rgba(255, 250, 241, 0.88);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.2rem, 1.8vw, 1.58rem);
   line-height: 1.05;
 }
 
-.storyCard p {
-  margin: 0.38rem 0.9rem 0.95rem;
-  color: rgba(255, 250, 241, 0.78);
-  font-size: 0.94rem;
-  line-height: 1.42;
+.openDoorGrid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem 0.74rem;
+  align-content: center;
+  padding: 0.28rem 0.12rem 0.12rem;
+}
+
+.doorConnectors {
+  position: absolute;
+  inset: 0.25rem 0.2rem;
+  z-index: 0;
+  width: calc(100% - 0.4rem);
+  height: calc(100% - 0.5rem);
+  overflow: visible;
+  opacity: 0.46;
+  pointer-events: none;
+}
+
+.doorConnectors path {
+  fill: none;
+  stroke: rgba(255, 215, 106, 0.42);
+  stroke-dasharray: 6 12;
+  stroke-linecap: round;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 106, 0.36));
+  animation: mapThreadFlow 10s linear infinite;
+}
+
+.openDoor {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-height: 8.4rem;
+  align-items: end;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--door-accent) 48%, rgba(255, 250, 241, 0.15));
+  border-radius: 999px 999px 8px 8px;
+  background: rgba(5, 10, 22, 0.42);
+  color: inherit;
+  padding: 0;
+  text-decoration: none;
+  box-shadow: 0 0 0 1px rgba(255, 250, 241, 0.05);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.openDoor:nth-of-type(7) {
+  width: 48%;
+  grid-column: 1 / -1;
+  justify-self: center;
+}
+
+.openDoor:hover {
+  border-color: var(--door-accent);
+  box-shadow: 0 0 26px color-mix(in srgb, var(--door-accent) 34%, transparent);
+  transform: translateY(-0.18rem);
+}
+
+.openDoorImage {
+  position: absolute;
+  inset: 0;
+  display: block;
+  height: auto;
+  overflow: hidden;
+  border-radius: inherit;
+  background: rgba(255, 250, 241, 0.1);
+}
+
+.openDoorImage img,
+.futureDoorImage img {
+  object-fit: cover;
+}
+
+.openDoorImage::after {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(5, 10, 22, 0.08) 26%, rgba(5, 10, 22, 0.86)),
+    linear-gradient(135deg, color-mix(in srgb, var(--door-accent) 22%, transparent), transparent 58%);
+  content: "";
+}
+
+.openDoorCopy {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  min-width: 0;
+  gap: 0.16rem;
+  padding: 3.3rem 0.66rem 0.66rem;
+}
+
+.openDoorCopy small {
+  color: var(--door-accent);
+  font-size: 0.64rem;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.openDoorCopy strong {
+  color: #fffaf1;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1rem, 1.35vw, 1.2rem);
+  line-height: 1.02;
+}
+
+.openDoorCopy em {
+  color: rgba(255, 250, 241, 0.68);
+  font-size: 0.82rem;
+  font-style: normal;
+}
+
+.futureRunway {
+  display: grid;
+  gap: 0.8rem;
+  padding: 0.9rem;
+}
+
+.futureIntro {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.futureIntro h3 {
+  max-width: 34rem;
+  margin: 0;
+  color: #fffaf1;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.55rem, 3vw, 2.35rem);
+  line-height: 1.02;
+}
+
+.futureDoorRail {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.6rem, 1fr));
+  gap: 0.62rem;
+}
+
+.futureDoor,
+.contributionDoor {
+  position: relative;
+  display: grid;
+  min-height: 12.5rem;
+  align-content: end;
+  overflow: hidden;
+  border: 1px solid rgba(255, 250, 241, 0.14);
+  border-radius: 8px;
+  background: rgba(5, 10, 22, 0.52);
+  color: inherit;
+  padding: 0.72rem;
+}
+
+.futureDoor::after,
+.contributionDoor::after {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(5, 10, 22, 0.04), rgba(5, 10, 22, 0.86)),
+    linear-gradient(135deg, color-mix(in srgb, var(--door-accent) 24%, transparent), transparent 54%);
+  content: "";
+}
+
+.futureDoorImage {
+  position: absolute;
+  inset: 0;
+  opacity: 0.52;
+  filter: saturate(0.78);
+}
+
+.futureDoor small,
+.futureDoor strong,
+.contributionDoor small,
+.contributionDoor strong,
+.contributionDoor span {
+  position: relative;
+  z-index: 2;
+}
+
+.futureDoor small,
+.contributionDoor small {
+  color: var(--door-accent);
+  font-size: 0.66rem;
+  font-weight: 950;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.futureDoor strong,
+.contributionDoor strong {
+  color: #fffaf1;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.12rem;
+  line-height: 1.04;
+}
+
+.contributionDoor {
+  border-color: rgba(255, 215, 106, 0.38);
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 215, 106, 0.08) 0 1px, transparent 1px 12px),
+    rgba(5, 10, 22, 0.62);
+  text-decoration: none;
+}
+
+.contributionDoor span {
+  margin-top: 0.45rem;
+  color: rgba(255, 250, 241, 0.74);
+  font-size: 0.82rem;
+  line-height: 1.34;
 }
 
 .storyAction {
@@ -1017,6 +1993,62 @@
   padding: 0 1.2rem;
   text-decoration: none;
   box-shadow: 0 12px 30px rgba(7, 16, 34, 0.18);
+}
+
+@keyframes mapThreadFlow {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -96; }
+}
+
+@keyframes gatewayValuePulse {
+  0%, 61% {
+    opacity: 0;
+    stroke-dashoffset: 120;
+  }
+  68% {
+    opacity: 0.95;
+  }
+  84% {
+    opacity: 0.78;
+    stroke-dashoffset: -78;
+  }
+  92%, 100% {
+    opacity: 0;
+    stroke-dashoffset: -160;
+  }
+}
+
+@keyframes gatewayNodePulse {
+  0%, 100% {
+    opacity: 0.54;
+    transform: scale(0.86);
+  }
+  48% {
+    opacity: 1;
+    transform: scale(1.22);
+  }
+}
+
+@keyframes gatewayDoorBreath {
+  0%, 100% {
+    opacity: 0.24;
+    transform: scale(0.94);
+  }
+  45% {
+    opacity: 0.78;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes futureDoorListen {
+  0%, 100% {
+    opacity: 0.52;
+    transform: translate(-50%, -50%) scale(calc(var(--door-scale) * 0.96));
+  }
+  48% {
+    opacity: 0.9;
+    transform: translate(-50%, -51%) scale(calc(var(--door-scale) * 1.05));
+  }
 }
 
 @keyframes heroAhaGlow {
@@ -1180,8 +2212,33 @@
     min-height: 0;
   }
 
-  .storyStrip {
+  .networkStage {
     grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .mapPanel {
+    min-height: 32rem;
+  }
+
+  .doorBoard {
+    min-height: 0;
+  }
+
+  .openDoorGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .futureDoorRail {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .gatewayScene {
+    min-height: 640px;
+  }
+
+  .gatewayStoryRail {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -1391,60 +2448,208 @@
 
   .storyWorld {
     width: 100%;
-    padding: 2.6rem 0 3rem;
+    padding: 2.7rem 0 4.4rem;
   }
 
-  .storyIntro {
+  .networkShell {
     width: min(100% - 1.4rem, 31rem);
-    gap: 0.5rem;
-    margin-bottom: 0.82rem;
+    gap: 0.76rem;
   }
 
-  .storyIntro h2 {
+  .networkIntro {
+    gap: 0.5rem;
+  }
+
+  .networkIntro h2 {
     font-size: clamp(2rem, 10vw, 2.75rem);
   }
 
-  .storyIntro span {
+  .networkIntro span {
     font-size: 0.96rem;
     line-height: 1.5;
   }
 
-  .storyStrip {
-    width: min(100% - 1.4rem, 31rem);
-    gap: 0.68rem;
+  .gatewayScene {
+    min-height: min(720px, calc(100vh - 3rem));
+    border-right: 0;
+    border-left: 0;
+    margin-inline: -0.7rem;
   }
 
-  .storyCard {
+  .gatewayImage {
+    object-position: center 48%;
+    transform: scale(1.12);
+  }
+
+  .gatewayThreads {
+    inset: 12% -4% 22%;
+    width: 108%;
+    height: 66%;
+    opacity: 0.58;
+  }
+
+  .gatewayDoor {
+    width: clamp(3.55rem, 15vw, 4.65rem);
+  }
+
+  .gatewayDoorNumber {
+    width: 1.22rem;
+    height: 1.22rem;
+    font-size: 0.62rem;
+  }
+
+  .gatewayDoorPreview {
+    width: 52%;
+  }
+
+  .gatewayDoorText {
+    display: none;
+  }
+
+  .futureGatewayDoor {
+    width: clamp(1.68rem, 8vw, 2.35rem);
+  }
+
+  .futureGatewayDoor span {
+    display: none;
+  }
+
+  .gatewayContributionDoor {
+    width: 7.15rem;
+    min-height: 4.15rem;
+    padding: 0.52rem;
+  }
+
+  .gatewayContributionDoor strong {
+    font-size: 0.68rem;
+  }
+
+  .gatewayLegend {
+    left: 0.62rem;
+    right: 0.62rem;
+    bottom: 0.68rem;
     display: grid;
+    max-width: none;
+    border-radius: 8px;
+    gap: 0.38rem;
+    padding: 0.68rem;
   }
 
-  .storyImage {
-    grid-row: auto;
-    height: auto;
-    aspect-ratio: 16 / 10;
-    border-radius: 0;
+  .gatewayLegend span {
+    display: none;
   }
 
-  .storyCard > span {
-    margin: 0.8rem 0.82rem 0;
+  .gatewayLegend a {
+    width: 100%;
   }
 
-  .storyCard h3 {
-    grid-column: auto;
-    margin: 0.28rem 0.82rem 0;
-    font-size: 1.38rem;
+  .gatewayStoryRail {
+    display: flex;
+    overflow-x: auto;
+    gap: 0.5rem;
+    padding: 0.1rem 0 0.22rem;
+    scroll-snap-type: x mandatory;
   }
 
-  .storyCard p {
-    grid-column: auto;
-    margin: 0.3rem 0.82rem 0.82rem;
-    font-size: 0.88rem;
-    line-height: 1.34;
+  .gatewayStoryChip {
+    min-width: 8.2rem;
+    scroll-snap-align: start;
+  }
+
+  .networkStage {
+    gap: 0.76rem;
+  }
+
+  .mapPanel {
+    min-height: 32rem;
+  }
+
+  .mapThreads {
+    inset: 9% 2% 30%;
+  }
+
+  .thinToothlight {
+    left: 6%;
+    top: 7%;
+    width: 4.7rem;
+  }
+
+  .memoryNodeLayer {
+    inset: 7% 4% 9%;
+  }
+
+  .memoryNode {
+    width: 3.55rem;
+  }
+
+  .memoryNode span {
+    width: 1.08rem;
+    height: 1.08rem;
+    font-size: 0.58rem;
+  }
+
+  .memoryNode:nth-child(1) { left: 14%; top: 65%; }
+  .memoryNode:nth-child(2) { left: 39%; top: 53%; }
+  .memoryNode:nth-child(3) { left: 68%; top: 66%; }
+  .memoryNode:nth-child(4) { left: 74%; top: 39%; }
+  .memoryNode:nth-child(5) { left: 9%; top: 39%; }
+  .memoryNode:nth-child(6) { left: 42%; top: 24%; }
+  .memoryNode:nth-child(7) { left: 66%; top: 19%; }
+
+  .doorConnectors {
+    inset: 0.1rem;
+    width: calc(100% - 0.2rem);
+    height: calc(100% - 0.2rem);
+  }
+
+  .doorBoard {
+    padding: 0.68rem;
+  }
+
+  .openDoorGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.48rem;
+  }
+
+  .openDoor {
+    min-height: 7.6rem;
+  }
+
+  .openDoor:nth-of-type(7) {
+    width: 50%;
+  }
+
+  .openDoorCopy strong {
+    font-size: 0.98rem;
+  }
+
+  .futureRunway {
+    padding: 0.68rem;
+  }
+
+  .futureIntro {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .futureDoorRail {
+    display: flex;
+    overflow-x: auto;
+    gap: 0.58rem;
+    padding-bottom: 0.24rem;
+    scroll-snap-type: x mandatory;
+  }
+
+  .futureDoor,
+  .contributionDoor {
+    min-width: 12rem;
+    min-height: 12rem;
+    scroll-snap-align: start;
   }
 
   .storyAction {
     width: min(100% - 1.4rem, 31rem);
-    margin-top: 0.78rem;
+    margin-top: 0.24rem;
     margin-inline: auto;
   }
 
@@ -1493,27 +2698,30 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stage *,
-  .stage *::before,
-  .stage *::after {
+  .storyWorld *,
+  .storyWorld *::before,
+  .storyWorld *::after,
+  .stage:not([data-force-motion="true"]) *,
+  .stage:not([data-force-motion="true"]) *::before,
+  .stage:not([data-force-motion="true"]) *::after {
     animation: none !important;
   }
 
-  .flightTrails,
-  .phoneGlow,
-  .coinAura,
-  .sparkles,
-  .emptyPinchPatch {
+  .stage:not([data-force-motion="true"]) .flightTrails,
+  .stage:not([data-force-motion="true"]) .phoneGlow,
+  .stage:not([data-force-motion="true"]) .coinAura,
+  .stage:not([data-force-motion="true"]) .sparkles,
+  .stage:not([data-force-motion="true"]) .emptyPinchPatch {
     display: none;
   }
 
-  .sourceTooth {
+  .stage:not([data-force-motion="true"]) .sourceTooth {
     display: grid;
     opacity: 1;
     transform: none;
   }
 
-  .tanda {
+  .stage:not([data-force-motion="true"]) .tanda {
     display: block;
     left: 58%;
     top: 37%;
@@ -1521,25 +2729,25 @@
     transform: scale(.62) rotate(2deg);
   }
 
-  .pose {
+  .stage:not([data-force-motion="true"]) .pose {
     display: none;
     opacity: 0;
   }
 
-  .wave {
+  .stage:not([data-force-motion="true"]) .wave {
     display: block;
     opacity: 1;
   }
 
-  .wingGlow {
+  .stage:not([data-force-motion="true"]) .wingGlow {
     display: block;
     opacity: .56;
   }
 
-  .memoryCard,
-  .smileCard,
-  .pigGlow,
-  .slotGlow {
+  .stage:not([data-force-motion="true"]) .memoryCard,
+  .stage:not([data-force-motion="true"]) .smileCard,
+  .stage:not([data-force-motion="true"]) .pigGlow,
+  .stage:not([data-force-motion="true"]) .slotGlow {
     opacity: 1;
     transform: none;
   }

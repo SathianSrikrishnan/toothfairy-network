@@ -1,5 +1,4 @@
-import StorySelector from '@/components/toothfairy/story/StorySelector'
-import { ALL_STORIES } from '@/data/stories'
+import { redirect } from 'next/navigation'
 
 export const metadata = {
   title: 'Tooth Fairy Network - Read the Stories',
@@ -7,5 +6,5 @@ export const metadata = {
 }
 
 export default function StoryPage() {
-  return <StorySelector stories={ALL_STORIES} />
+  redirect('/toothfairy/stories')
 }
