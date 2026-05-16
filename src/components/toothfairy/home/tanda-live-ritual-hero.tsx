@@ -1,7 +1,9 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { contributionDoor, futureKeeperDoors, openKeeperDoors } from "@/data/toothfairy";
 import styles from "./tanda-live-ritual-hero.module.css";
 
 const liveAssetRoot = "/toothfairy/animation/live-hero-v1";
@@ -42,36 +44,6 @@ const steps = [
   },
 ] as const;
 
-const storyCards = [
-  {
-    chapter: "Chapter 1",
-    title: "Tanda and the Night the Network Woke",
-    body: "A skipped bedtime note wakes the Toothlight and sends Tanda looking for the other keepers.",
-    image: "/story-assets/tanda/v2/s1-frame-01-cover.png",
-    alt: "Tanda flying above a moonlit town as glowing teeth connect the first Tooth Fairy Network routes",
-    href: "/toothfairy/story/tanda",
-    position: "center",
-  },
-  {
-    chapter: "Chapter 2",
-    title: "Tanda Fae and the Tooth Fee",
-    body: "A father by the sea turns a small tooth into proof of growing up.",
-    image: "/story-assets/viking-origin/v2/s2-frame-01-cover-v3.png",
-    alt: "Young Tanda holding a glowing tooth beside her father in a Norse shipyard",
-    href: "/toothfairy/story/viking-origin",
-    position: "center",
-  },
-  {
-    chapter: "Chapter 3",
-    title: "Ratoncito Perez and the Toothlight Treaty",
-    body: "A child with two true family traditions asks Perez and Tanda not to make her choose.",
-    image: "/story-assets/ratoncito-perez/v2/rp3-frame-01-two-doors.png",
-    alt: "Tanda and Ratoncito Perez meeting on a Madrid rooftop under moonlight",
-    href: "/toothfairy/story/ratoncito-perez",
-    position: "center 38%",
-  },
-] as const;
-
 const poses = [
   ["entryUp", "tanda-entry-up.webp"],
   ["entryDown", "tanda-entry-down.webp"],
@@ -87,6 +59,57 @@ const poses = [
 ] as const;
 
 const priorityPoses = new Set(["entryUp", "entryDown", "reach", "grab", "lift"]);
+
+const gatewayDoorPositions = [
+  { x: 28, y: 70, scale: 1.06 },
+  { x: 38, y: 67, scale: 0.98 },
+  { x: 48, y: 70, scale: 1.08 },
+  { x: 58, y: 66, scale: 0.98 },
+  { x: 68, y: 70, scale: 1.06 },
+  { x: 42, y: 81, scale: 0.98 },
+  { x: 58, y: 81, scale: 0.98 },
+] as const;
+
+const futureGatewayPositions = [
+  { x: 20, y: 54, scale: 0.78 },
+  { x: 79, y: 54, scale: 0.78 },
+  { x: 30, y: 43, scale: 0.7 },
+  { x: 69, y: 42, scale: 0.7 },
+  { x: 49, y: 35, scale: 0.64 },
+  { x: 15, y: 65, scale: 0.68 },
+  { x: 84, y: 66, scale: 0.68 },
+  { x: 39, y: 30, scale: 0.58 },
+  { x: 61, y: 30, scale: 0.58 },
+] as const;
+
+const contributionDoorPosition = { x: 50, y: 88, scale: 1.02 } as const;
+
+const gatewayDoorThemes = [
+  "gatewayDoorTanda",
+  "gatewayDoorViking",
+  "gatewayDoorPerez",
+  "gatewayDoorKkachi",
+  "gatewayDoorWaraba",
+  "gatewayDoorDaga",
+  "gatewayDoorAnna",
+] as const;
+
+const gatewayDoorStyle = (
+  accent: string,
+  index: number,
+  position: { x: number; y: number; scale: number },
+) => ({
+  "--door-accent": accent,
+  "--door-index": String(index),
+  "--door-x": `${position.x}%`,
+  "--door-y": `${position.y}%`,
+  "--door-scale": String(position.scale),
+}) as CSSProperties;
+
+const gatewayDoorClassName = (index: number) => {
+  const theme = gatewayDoorThemes[index] ?? gatewayDoorThemes[0];
+  return `${styles.gatewayDoor} ${styles[theme]}`;
+};
 
 type MotionDiagnostics = {
   debug: boolean;
@@ -357,37 +380,122 @@ export default function TandaLiveRitualHero() {
         </div>
       </section>
 
-      <section className={styles.storyWorld} aria-label="Tooth Fairy Network stories">
-        <div className={styles.storyIntro}>
-          <p>Stories from around the world</p>
-          <h2>Tanda is building the Tooth Fairy Network.</h2>
-          <span>
-            Start with Tanda, then follow the old promises behind lost-tooth traditions from every corner of the world.
-          </span>
-        </div>
+      <section className={styles.storyWorld} aria-label="Children's Tooth Fairy Network story gateway">
+        <div className={styles.networkShell}>
+          <div className={styles.networkIntro}>
+            <p>Tanda's Network</p>
+            <h2>Tanda is building the Tooth Fairy Network.</h2>
+            <span>
+              The first keepers have opened their doors into their local traditions.
+            </span>
+          </div>
 
-        <div className={styles.storyStrip}>
-          {storyCards.map((story) => (
-            <a key={story.title} href={story.href} className={styles.storyCard}>
-              <div className={styles.storyImage}>
-                <Image
-                  src={story.image}
-                  alt={story.alt}
-                  fill
-                  sizes="(min-width: 900px) 360px, 92vw"
-                  style={{ objectPosition: story.position }}
-                />
-              </div>
-              <span>{story.chapter}</span>
-              <h3>{story.title}</h3>
-              <p>{story.body}</p>
+          <div className={styles.gatewayScene} aria-label="A vast story world with open and future tooth tradition doors">
+            <Image
+              src="/story-assets/network/story-world-gateway-v1.png"
+              alt="Tanda floating above a vast night sky network of glowing tooth story doors"
+              fill
+              sizes="(min-width: 1180px) 1180px, 100vw"
+              className={styles.gatewayImage}
+            />
+            <span className={styles.gatewayShade} aria-hidden />
+            <svg className={styles.gatewayThreads} viewBox="0 0 1200 720" preserveAspectRatio="none" aria-hidden>
+              <path d="M244 396 C 352 330, 440 360, 514 426 S 678 488, 818 386" />
+              <path d="M310 504 C 428 452, 530 534, 614 468 S 760 370, 942 418" />
+              <path d="M382 276 C 456 218, 560 240, 620 302 S 758 330, 876 244" />
+              <path d="M172 484 C 290 600, 420 616, 602 570 S 854 562, 1038 472" />
+              <path
+                className={styles.gatewayValuePulse}
+                d="M982 650 C 850 594, 760 556, 624 492 S 382 424, 236 318"
+              />
+              <circle className={styles.gatewayNodeA} cx="244" cy="396" r="5" />
+              <circle className={styles.gatewayNodeB} cx="514" cy="426" r="6" />
+              <circle className={styles.gatewayNodeC} cx="818" cy="386" r="5" />
+              <circle className={styles.gatewayNodeD} cx="624" cy="492" r="5.5" />
+            </svg>
+
+            <div className={styles.gatewayDoorLayer} aria-label="Open story doors">
+              {openKeeperDoors.map((door, index) => {
+                const position = gatewayDoorPositions[index] ?? gatewayDoorPositions[0];
+
+                return (
+                  <a
+                    key={door.id}
+                    href={door.href}
+                    className={gatewayDoorClassName(index)}
+                    style={gatewayDoorStyle(door.accent, index, position)}
+                    aria-label={`Read ${door.title}`}
+                    title={`${door.title}: ${door.objectName}`}
+                  >
+                    <span className={styles.gatewayDoorGlow} />
+                    <span className={styles.gatewayDoorCharm} />
+                    <span className={styles.gatewayDoorNumber}>{index + 1}</span>
+                    <span className={styles.gatewayDoorPreview}>
+                      <Image
+                        src={door.image}
+                        alt=""
+                        fill
+                        sizes="148px"
+                      />
+                    </span>
+                    <span className={styles.gatewayDoorText}>
+                      <small>{door.region}</small>
+                      <strong>{door.title}</strong>
+                    </span>
+                  </a>
+                );
+              })}
+            </div>
+
+            <div className={styles.futureGatewayLayer} aria-label="Future story doors">
+              {futureKeeperDoors.slice(0, futureGatewayPositions.length).map((door, index) => {
+                const position = futureGatewayPositions[index];
+
+                return (
+                  <span
+                    key={door.id}
+                    className={styles.futureGatewayDoor}
+                    style={gatewayDoorStyle(door.accent, index, position)}
+                    aria-label={`${door.title} is listening`}
+                  >
+                    <span>{door.region}</span>
+                  </span>
+                );
+              })}
+            </div>
+
+            <a
+              href={contributionDoor.href}
+              className={styles.gatewayContributionDoor}
+              style={gatewayDoorStyle(contributionDoor.accent, 10, contributionDoorPosition)}
+              aria-label={contributionDoor.title}
+            >
+              <span>?</span>
+              <strong>Your family's door</strong>
             </a>
-          ))}
-        </div>
 
-        <a href="/toothfairy/stories" className={styles.storyAction}>
-          Explore global tooth traditions
-        </a>
+            <div className={styles.gatewayLegend}>
+              <p>The first paths are open.</p>
+              <span>Hover a door to follow its thread.</span>
+              <a href="/toothfairy/stories">Open the story map</a>
+            </div>
+
+          </div>
+
+          <div className={styles.gatewayStoryRail} aria-label="The first open story doors">
+            {openKeeperDoors.map((door, index) => (
+              <a
+                key={door.id}
+                href={door.href}
+                className={styles.gatewayStoryChip}
+                style={gatewayDoorStyle(door.accent, index, gatewayDoorPositions[index] ?? gatewayDoorPositions[0])}
+              >
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <strong>{door.keeper}</strong>
+              </a>
+            ))}
+          </div>
+        </div>
       </section>
     </main>
   );
